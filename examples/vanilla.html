@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anti examples - Plain DOM</title>
+<meta name="description" content="The whole grammar on plain DOM: attribute binding, the drone gesture, a progress run, and the notification tier.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="gallery.css">
+
+<!-- The map is the only line here that is about this repo rather than about
+     the engine. In an app there is no map: the bundler resolves 'anti-tapes'
+     out of node_modules and every import below is unchanged. -->
+<script type="importmap">
+{ "imports": { "anti-tapes": "../dist/anti.mjs" } }
+</script>
+</head>
+
+<body class="at">
+
+<div class="at-page">
+
+  <header class="bar">
+    <span class="bar-group">
+      <a class="at-group" href="index.html">
+        <svg class="at-icon" aria-hidden="true"><use href="#at-mark"></use></svg>
+        Anti examples
+      </a>
+      <span class="at-chip at-chip--line">Plain DOM</span>
+    </span>
+    <span class="bar-group">
+      <span class="at-group at-group--accent hint" id="hint">
+        <svg class="at-icon at-icon--s" aria-hidden="true"><use href="#at-sound"></use></svg>
+        <span>Click anywhere to arm sound</span>
+      </span>
+      <button class="at-iconbtn at-soundbtn" id="soundflip" aria-pressed="true" aria-label="Sound">
+        <svg class="at-icon at-icon--s" id="soundflip-ico"><use href="#at-sound"></use></svg>
+      </button>
+      <button class="at-switch" id="themeflip" aria-pressed="false" aria-label="Night theme">
+        <span class="at-switch-slash"></span>
+      </button>
+    </span>
+  </header>
+
+  <section class="lead-block">
+    <span class="at-index">example / plain DOM</span>
+    <h1 class="at-hero">No framework, no build, no assets.</h1>
+    <p class="at-lead">Five blocks, and between them they use the whole grammar. Every sound below is synthesized on the spot from one theme object: nothing is fetched, and no two presses render the same waveform.</p>
+    <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
+      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1. binding ============ -->
+
+  <section class="demo">
+    <span class="at-index">01</span>
+    <h2 class="at-display">Bind it and forget it</h2>
+    <p class="at-body">One call wires every element carrying a <code>data-anti</code> attribute. For a button whose meaning is already in the markup, this is the entire integration: no handlers, no imports at the call site.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-row">
+          <button class="at-btn at-btn--primary" data-anti="commit">Save</button>
+          <button class="at-btn" data-anti="reject">Cancel</button>
+          <button class="at-btn at-btn--tag" data-anti="tick">Next</button>
+          <button class="at-btn" disabled>Unavailable</button>
+        </div>
+        <p class="at-caption">The disabled button is silent on purpose: nothing happened, so nothing is said. A control that refuses out loud is a different case, and it is a <em>locked</em> one.</p>
+      </div>
+      <pre class="code">import Anti from 'anti-tapes'
+
+Anti.bind()   <span class="cmt">// every [data-anti], wired</span>
+
+<span class="cmt">&lt;button data-anti="commit"&gt;Save&lt;/button&gt;
+&lt;button data-anti="reject"&gt;Cancel&lt;/button&gt;
+&lt;button data-anti="tick"&gt;Next&lt;/button&gt;</span></pre>
+    </div>
+  </section>
+
+  <!-- ============ 2. a mechanism ============ -->
+
+  <section class="demo">
+    <span class="at-index">02</span>
+    <h2 class="at-display">A mechanism gets a pair</h2>
+    <p class="at-body">A switch is discrete: it is taken hold of and it lands. That is the one-shot pair, grab on the press and a verdict on the landing, and it is the shape a keyboard key, a checkbox, and a segmented control all take.</p>
+
+    <div class="split">
+      <div class="stage">
+        <button class="at-switch" id="sw" aria-pressed="false" aria-label="Airplane mode">
+          <span class="at-switch-slash"></span>
+        </button>
+        <p class="at-caption" id="swstate">Off</p>
+      </div>
+      <pre class="code">sw.addEventListener('pointerdown', () =&gt; {
+  Anti.play('grab')          <span class="cmt">// taken hold of</span>
+})
+
+sw.addEventListener('click', () =&gt; {
+  const on = toggle()
+  <span class="cmt">// It landed. Off is a landing too, and a
+  // quieter one: it resolves lower.</span>
+  Anti.play('commit', { value: on ? 0.7 : 0.35 })
+})</pre>
+    </div>
+  </section>
+
+  <!-- ============ 3. the drone ============ -->
+
+  <section class="demo">
+    <span class="at-index">03</span>
+    <h2 class="at-display">A drag is one gesture, so it is one sound</h2>
+    <p class="at-body">Continuous change is a held drone that glides with the value. The onset <em>is</em> the grab and the decay <em>is</em> the release, so a drag starts with <code>drone.start</code> alone and ends with <code>drone.stop</code> alone. Layering a pluck at either end is the most common way to get this wrong: two sounds read as two events.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-fader" style="width: 100%; max-width: 420px">
+          <div class="at-leaders">
+            <span>Level</span><span class="at-leaders-fill"></span>
+            <b id="lvlout">0.50</b>
+          </div>
+          <input type="range" id="lvl" min="0" max="1" step="0.001" value="0.5" aria-label="Level">
+        </div>
+        <p class="at-caption">Drag it, then tab to it and use the arrow keys. A keyboard user is not dragging: they are stepping, so each notch gets its own pluck instead of a held voice. The gesture decides the sound, not the widget.</p>
+      </div>
+      <pre class="code">lvl.addEventListener('pointerdown', () =&gt; {
+  dragging = true
+  Anti.drone.start('level', norm())   <span class="cmt">// the grab</span>
+})
+
+lvl.addEventListener('input', () =&gt; {
+  if (dragging) {
+    Anti.drone.move('level', norm())  <span class="cmt">// glides</span>
+  } else if (performance.now() - last &gt; 40) {
+    last = performance.now()          <span class="cmt">// keyboard: a</span>
+    Anti.play('grab', { value: norm() })  <span class="cmt">// pluck per notch</span>
+  }
+})
+
+<span class="cmt">// pointerup, and pointercancel, which is the one
+// every implementation forgets and then leaks a
+// held voice on.</span>
+const end = () =&gt; {
+  if (!dragging) return
+  dragging = false
+  Anti.drone.stop('level')            <span class="cmt">// the release</span>
+}
+window.addEventListener('pointerup', end)
+window.addEventListener('pointercancel', end)</pre>
+    </div>
+  </section>
+
+  <!-- ============ 4. progress ============ -->
+
+  <section class="demo">
+    <span class="at-index">04</span>
+    <h2 class="at-display">Loading that resolves when it lands</h2>
+    <p class="at-body">A progress run is a voice-led figure that arrives exactly at 100%: the lead climbs the ladder, a bass walks the quarters, and a reference tone beats slower as it closes. <code>done</code> resolves it. <code>stop</code> abandons it without resolution, which is what a cancel actually sounds like.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-row">
+          <button class="at-btn at-btn--primary" id="upload">Upload</button>
+          <button class="at-btn" id="cancel" disabled>Cancel</button>
+          <button class="at-btn at-btn--tag" id="indet">Indeterminate</button>
+        </div>
+        <div class="at-readout" style="min-width: 220px">
+          <div class="at-leaders"><span>State</span><span class="at-leaders-fill"></span><b id="upstate">idle</b></div>
+        </div>
+        <p class="at-caption">Indeterminate is a real state and it sounds like one: <code>hold</code> rocks between two rungs with no reference tone, because a reference is a promise of resolution and this state makes none.</p>
+      </div>
+      <pre class="code">Anti.progress.start('upload', 0)
+
+<span class="cmt">// as the bytes land</span>
+Anti.progress.set('upload', 0.4)
+
+<span class="cmt">// no ETA to give</span>
+Anti.progress.hold('upload')
+
+Anti.progress.done('upload')   <span class="cmt">// resolves</span>
+Anti.progress.stop('upload')   <span class="cmt">// abandons</span></pre>
+    </div>
+  </section>
+
+  <!-- ============ 5. notifications ============ -->
+
+  <section class="demo">
+    <span class="at-index">05</span>
+    <h2 class="at-display">The tier that speaks without being asked</h2>
+    <p class="at-body">Four notifications, and their shapes are their meanings. Success ascends and resolves. Info is a calm consonant ping. Warning oscillates and ends unresolved, with a faint beat left in the air. Error falls and lands in a beating cluster, which is the one place a charged waveform earns its keep.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-row">
+          <button class="at-btn" data-note="success">Success</button>
+          <button class="at-btn" data-note="info">Info</button>
+          <button class="at-btn" data-note="warning">Warning</button>
+          <button class="at-btn" data-note="error">Error</button>
+        </div>
+        <p class="at-caption">Fire them in a row. The repetition governor thins fast repeats of the same event and lets them recover over about a second of quiet, so a retry loop cannot turn into a jackhammer.</p>
+      </div>
+      <pre class="code">Anti.play('success')
+Anti.play('info')
+Anti.play('warning')
+Anti.play('error')
+
+<span class="cmt">// The sight and the sound name the same tier,
+// so they cannot drift apart.</span>
+toast(tier, message)</pre>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="at-body"><a class="at-btn at-btn--tag" href="index.html">All examples</a></p>
+  </footer>
+
+</div>
+
+<div class="toastrail"><div class="at-toaststack" id="toasts" role="status" aria-live="polite" aria-atomic="false" aria-label="Notifications"></div></div>
+
+
+<script type="module">
+  import Anti from 'anti-tapes';
+  import { mountChrome, toast } from './chrome.js';
+
+  const el = (id) => document.getElementById(id);
+
+  // 01. Attribute binding. Everything carrying data-anti is now wired.
+  Anti.bind();
+
+  // 02. The mechanism: grab on the press, a verdict on the landing.
+  const sw = el('sw');
+  sw.addEventListener('pointerdown', () => Anti.play('grab'));
+  sw.addEventListener('click', () => {
+    const on = sw.getAttribute('aria-pressed') !== 'true';
+    sw.setAttribute('aria-pressed', String(on));
+    el('swstate').textContent = on ? 'On' : 'Off';
+    // Off is a landing too, and a quieter one, so it resolves lower on the
+    // ladder. Weight is pitch here, the same way a modal opens lower than a
+    // popover: the height of the sound says how much just happened.
+    Anti.play('commit', { value: on ? 0.7 : 0.35 });
+  });
+
+  // 03. The drone gesture.
+  const lvl = el('lvl'), lvlout = el('lvlout');
+  const norm = () => parseFloat(lvl.value);
+  let dragging = false, lastKey = 0;
+
+  lvl.addEventListener('pointerdown', () => {
+    dragging = true;
+    Anti.drone.start('level', norm());
+  });
+  lvl.addEventListener('input', () => {
+    lvlout.textContent = norm().toFixed(2);
+    if (dragging) {
+      Anti.drone.move('level', norm());
+    } else {
+      // Keyboard: stepping, not dragging. A pluck per notch, throttled so a
+      // held arrow key does not outrun the ear.
+      const now = performance.now();
+      if (now - lastKey > 40) { lastKey = now; Anti.play('grab', { value: norm() }); }
+    }
+  });
+  // pointercancel matters as much as pointerup: a gesture the browser takes
+  // away (a scroll claiming the pointer, a context menu) still has to release
+  // the voice, or the page hums until the tab closes.
+  const endDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    Anti.drone.stop('level');
+  };
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+
+  // 04. The progress run.
+  const upstate = el('upstate'), cancel = el('cancel');
+  let run = null;
+
+  function setRunning(on) {
+    el('upload').disabled = on;
+    el('indet').disabled = on;
+    cancel.disabled = !on;
+  }
+
+  el('upload').addEventListener('click', () => {
+    let p = 0;
+    setRunning(true);
+    upstate.textContent = '0%';
+    Anti.progress.start('upload', 0);
+    run = setInterval(() => {
+      p = Math.min(1, p + 0.07);
+      Anti.progress.set('upload', p);
+      upstate.textContent = Math.round(p * 100) + '%';
+      if (p >= 1) {
+        clearInterval(run); run = null;
+        Anti.progress.done('upload');
+        upstate.textContent = 'done';
+        setRunning(false);
+        toast('success', 'Upload complete');
+      }
+    }, 260);
+  });
+
+  el('indet').addEventListener('click', () => {
+    setRunning(true);
+    upstate.textContent = 'working';
+    Anti.progress.start('upload', 0);
+    Anti.progress.hold('upload');
+    run = setTimeout(() => {
+      run = null;
+      Anti.progress.done('upload');
+      upstate.textContent = 'done';
+      setRunning(false);
+    }, 4000);
+  });
+
+  cancel.addEventListener('click', () => {
+    if (run) { clearInterval(run); clearTimeout(run); run = null; }
+    // Abandoned, not resolved. The run stops where it stood and the reject
+    // says what happened to it.
+    Anti.progress.stop('upload');
+    Anti.play('reject');
+    upstate.textContent = 'cancelled';
+    setRunning(false);
+  });
+
+  // 05. The notification tier.
+  const COPY = {
+    success: 'Changes saved',
+    info: 'Two items synced',
+    warning: 'Connection is weak',
+    error: 'Upload failed'
+  };
+  document.querySelectorAll('[data-note]').forEach((b) => {
+    b.addEventListener('click', () => toast(b.dataset.note, COPY[b.dataset.note]));
+  });
+
+  // Leaving this page mid-drag would otherwise leave a voice held.
+  window.addEventListener('pagehide', () => Anti.silence());
+
+  mountChrome();
+</script>
+
+<script>
+  // If the module graph never resolved, the page is silent with no explanation,
+  // which is the worst failure a sound demo can have. Say why.
+  setTimeout(function () {
+    if (!window.__antiExample) document.getElementById('nobuild').hidden = false;
+  }, 1000);
+</script>
+
+</body>
+</html>

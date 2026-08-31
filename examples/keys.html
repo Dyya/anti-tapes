@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anti examples - Keys</title>
+<meta name="description" content="Typing as a sound surface: every character on the letter ladder, and backspace as the one reversed envelope in the grammar.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="gallery.css">
+<style>
+  /* The typing surface, and the ladder underneath it. It is a field, not a
+     screen: at-screen is a 16:10 display with a 300px floor, which is the
+     right primitive for showing a device and the wrong one for typing into.
+     So it takes the input's manners instead, including the one stroke of
+     voltage on focus and no second ring. */
+  .keys { width: 100%; max-width: 620px; }
+  .surface {
+    min-height: 132px;
+    padding: var(--at-s5);
+    background: var(--at-surface);
+    border: var(--at-line) solid transparent;
+    border-radius: var(--at-r);
+    cursor: text;
+    transition: border-color var(--at-t2) var(--at-settle);
+  }
+  .surface:focus, .surface:focus-visible { outline: none; border-color: var(--at-accent); }
+  .typed {
+    font-family: var(--at-mono);
+    font-size: var(--at-fs-lead);
+    line-height: 1.6;
+    color: var(--at-ink);
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+  .typed:empty::before { content: 'Type here'; color: var(--at-ink-3); }
+
+  /* Twenty-six rungs. The one under the last character inks, so the pitch you
+     just heard has a place you can see it came from. */
+  .ladder { display: flex; gap: 3px; align-items: flex-end; margin-top: var(--at-s4); height: 18px; }
+  .rung {
+    flex: 1;
+    min-width: 0;
+    height: 4px;
+    background: var(--at-hairline-2);
+    border-radius: 1px;
+    transition: height var(--at-t2) var(--at-settle), background var(--at-t2) var(--at-settle);
+  }
+  .rung.lit { height: 16px; background: var(--at-accent); }
+</style>
+
+<script type="importmap">
+{ "imports": { "anti-tapes": "../dist/anti.mjs" } }
+</script>
+</head>
+
+<body class="at">
+
+<div class="at-page">
+
+  <header class="bar">
+    <span class="bar-group">
+      <a class="at-group" href="index.html">
+        <svg class="at-icon" aria-hidden="true"><use href="#at-mark"></use></svg>
+        Anti examples
+      </a>
+      <span class="at-chip at-chip--line">Keys</span>
+    </span>
+    <span class="bar-group">
+      <span class="at-group at-group--accent hint" id="hint">
+        <svg class="at-icon at-icon--s" aria-hidden="true"><use href="#at-sound"></use></svg>
+        <span>Click anywhere to arm sound</span>
+      </span>
+      <button class="at-iconbtn at-soundbtn" id="soundflip" aria-pressed="true" aria-label="Sound">
+        <svg class="at-icon at-icon--s" id="soundflip-ico"><use href="#at-sound"></use></svg>
+      </button>
+      <button class="at-switch" id="themeflip" aria-pressed="false" aria-label="Night theme">
+        <span class="at-switch-slash"></span>
+      </button>
+    </span>
+  </header>
+
+  <section class="lead-block">
+    <span class="at-index">example / keys</span>
+    <h1 class="at-hero">Typing, and taking it back.</h1>
+    <p class="at-lead">The oldest experiment in this project and still the one that proves the point. Every character speaks at its own pitch, and backspace is the only sound in the grammar that runs backwards.</p>
+    <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
+      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">01</span>
+    <h2 class="at-display">Type into it</h2>
+    <p class="at-body">Then hold backspace and listen to the difference. Enter commits, escape rejects and clears.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="keys">
+          <div class="surface" id="surface" tabindex="0" role="textbox" aria-multiline="true" aria-label="Typing surface">
+            <div class="typed" id="typed"></div>
+          </div>
+          <div class="ladder" id="ladder" aria-hidden="true"></div>
+          <div class="at-readout" style="margin-top: var(--at-s4)">
+            <div class="at-leaders"><span>Last event</span><span class="at-leaders-fill"></span><b id="last">none</b></div>
+            <div class="at-leaders"><span>Rung</span><span class="at-leaders-fill"></span><b id="rung">-</b></div>
+          </div>
+        </div>
+      </div>
+      <pre class="code">const pitch = (ch) =&gt; {
+  const c = ch.toLowerCase()
+  <span class="cmt">// a is the bottom rung, z the top</span>
+  if (c &gt;= 'a' &amp;&amp; c &lt;= 'z') return (c.charCodeAt(0) - 97) / 25
+  if (c &gt;= '0' &amp;&amp; c &lt;= '9') return (c.charCodeAt(0) - 48) / 9
+  <span class="cmt">// space and punctuation are the gaps between
+  // words, so they sit low and stay out of the way</span>
+  return 0.15
+}
+
+<span class="cmt">// A character arrives: the positional micro event,
+// quieter and shorter than a grab. It is the most
+// fired sound in any real interface.</span>
+Anti.play('tick', { value: pitch(ch) })
+
+<span class="cmt">// A character leaves: fired at the pitch of the
+// character being removed, not the one left behind.</span>
+Anti.play('undo', { value: pitch(removed) })</pre>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">02</span>
+    <h2 class="at-display">Why undo is its own event</h2>
+    <p class="at-body">Ten of the eleven events are forward gestures: they attack, then decay. Undo is the one that is built the other way round. The voice swells in slowly, bends down an octave with both endpoints quantized to the ladder, and then seats fast, so a deletion reads as an insertion played in reverse.</p>
+    <p class="at-body">This was the last event added to the grammar, in v0.8, and it was added because no forward sound could say "taken back". Every other interaction family that got mapped onto this engine (buttons, layers, forms, motion, voice) turned out to need judgment about which existing pair applied, and no new events at all. Typing needed one.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-row">
+          <button class="at-btn" id="hear-tick">Hear tick</button>
+          <button class="at-btn" id="hear-undo">Hear undo</button>
+          <button class="at-btn at-btn--tag" id="hear-burst">A word, then take it back</button>
+        </div>
+        <p class="at-caption">The same rung, forwards and backwards. They are the same length and roughly the same loudness: what differs is which end the energy is at.</p>
+      </div>
+      <pre class="code"><span class="cmt">// tick:  attack, then decay.
+// undo:  swell, bend down an octave, seat.
+//
+// One is the time mirror of the other, which is
+// why a deletion does not need a new metaphor:
+// it is the insertion, run the other way.</span>
+
+Anti.play('tick', { value: 0.6 })
+Anti.play('undo', { value: 0.6 })</pre>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="at-body"><a class="at-btn at-btn--tag" href="index.html">All examples</a></p>
+  </footer>
+
+</div>
+
+
+<script type="module">
+  import Anti from 'anti-tapes';
+  import { mountChrome } from './chrome.js';
+
+  const el = (id) => document.getElementById(id);
+
+  // The letter ladder: a is the bottom rung, z the top, so a word has a shape
+  // and the same word always has the same one.
+  function pitch(ch) {
+    const c = ch.toLowerCase();
+    if (c >= 'a' && c <= 'z') return (c.charCodeAt(0) - 97) / 25;
+    if (c >= '0' && c <= '9') return (c.charCodeAt(0) - 48) / 9;
+    // Space and punctuation are the gaps between words, not words. They sit low
+    // and stay out of the way of the letters.
+    return 0.15;
+  }
+
+  // Twenty-six rungs, drawn once.
+  const ladder = el('ladder');
+  for (let i = 0; i < 26; i++) {
+    const r = document.createElement('span');
+    r.className = 'rung';
+    ladder.appendChild(r);
+  }
+  const rungs = [...ladder.children];
+
+  function light(ch) {
+    const c = ch.toLowerCase();
+    const i = (c >= 'a' && c <= 'z') ? c.charCodeAt(0) - 97 : -1;
+    rungs.forEach((r, n) => r.classList.toggle('lit', n === i));
+    el('rung').textContent = i < 0 ? 'off ladder' : c + '  ' + pitch(ch).toFixed(2);
+  }
+
+  const surface = el('surface'), typed = el('typed');
+  let text = '';
+
+  function render() { typed.textContent = text; }
+
+  function say(name) { el('last').textContent = name; }
+
+  surface.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (!text) { Anti.play('reject'); say('reject (nothing to take back)'); return; }
+      const removed = text[text.length - 1];
+      text = text.slice(0, -1);
+      render();
+      // Fired at the pitch of the character being removed, not the one left
+      // behind: the sound is about what left, so it has to be that one's note.
+      Anti.play('undo', { value: pitch(removed) });
+      light(removed);
+      say('undo');
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      Anti.play('commit');
+      say('commit');
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (!text) return;
+      text = '';
+      render();
+      Anti.play('reject');
+      say('reject');
+      return;
+    }
+
+    if (e.key.length !== 1) return;
+    e.preventDefault();
+    text += e.key;
+    render();
+    Anti.play('tick', { value: pitch(e.key) });
+    light(e.key);
+    say('tick');
+  });
+
+  // A typing surface that has to be clicked before it hears anything is a
+  // typing surface people think is broken.
+  surface.addEventListener('click', () => surface.focus());
+  window.addEventListener('load', () => surface.focus());
+
+  el('hear-tick').addEventListener('click', () => Anti.play('tick', { value: 0.6 }));
+  el('hear-undo').addEventListener('click', () => Anti.play('undo', { value: 0.6 }));
+
+  el('hear-burst').addEventListener('click', async () => {
+    const word = 'typing';
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    for (const ch of word) { Anti.play('tick', { value: pitch(ch) }); light(ch); await wait(110); }
+    await wait(320);
+    for (const ch of [...word].reverse()) { Anti.play('undo', { value: pitch(ch) }); light(ch); await wait(110); }
+  });
+
+  mountChrome();
+</script>
+
+<script>
+  setTimeout(function () {
+    if (!window.__antiExample) document.getElementById('nobuild').hidden = false;
+  }, 1000);
+</script>
+
+</body>
+</html>

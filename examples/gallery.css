@@ -1,0 +1,450 @@
+/*
+  The example gallery's stylesheet, and it is deliberately self-contained.
+
+  These pages used to load Anti's internal design system, along with its icon
+  and fader scripts. That was fine while the gallery only ever ran beside it,
+  and it stopped being fine the moment the examples became part of the public
+  engine repository: the design system is proprietary, the engine is MIT, and a
+  public example page cannot depend on a private stylesheet.
+
+  So this file provides exactly the classes the five pages use and nothing
+  else. It keeps the `at-` prefix and the class names, which means the page
+  markup did not change at all and the two versions cannot drift: there is one
+  gallery, it is this one, and it is the one that ships. Same reasoning as
+  tools/build-package.js, where the engine npm installs is the engine this repo
+  reads, character for character.
+
+  It is a family resemblance to the design system rather than a copy of it. The
+  tokens are the same values because they are the brand's values; the component
+  rules are written fresh and only as far as these pages need them. Anything
+  here that grows a second variant probably belongs back in the real system,
+  which these pages are not.
+*/
+
+/* ---------- tokens ---------- */
+
+:root {
+  --at-paper: #FFFFFF;
+  --at-surface: #F5F5F5;
+  --at-panel: #EDEFF2;
+  /* The split rule, mirrored from the design system (2026-08-18): the cool
+     grounds stay cool (paper here is white, and the panel keeps the system
+     paper's cool air), and the content plane, the ink ramp and the surface
+     that fills inputs, chips and code blocks, is neutral, never blue. The
+     first mirror of the rule moved only the ink ramps and left the fills on
+     the condemned cool set; the token suite reads this file now, so the seam
+     cannot reopen silently. */
+  --at-ink: #0A0A0A;
+  --at-ink-2: rgba(10, 10, 10, 0.66);
+  --at-ink-3: rgba(10, 10, 10, 0.42);
+  --at-hairline: rgba(10, 10, 10, 0.12);
+  --at-hairline-2: rgba(10, 10, 10, 0.22);
+  /* The accent's two steps, mirroring the design system: --at-accent is the
+     lamp (a ground with --at-on-accent standing on it, one value in both
+     themes) and --at-accent-ink is the accent when it has to be read, which is
+     the only half that flips with the field. */
+  --at-accent: #DC1C2E;
+  --at-on-accent: #FFFFFF;
+  --at-accent-ink: #B01623;
+
+  --at-mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+
+  --at-fs-hero: clamp(30px, 4.6vw, 52px);
+  --at-fs-display: clamp(19px, 2.2vw, 26px);
+  --at-fs-lead: 15px;
+  --at-fs-body: 13.5px;
+  --at-fs-label: 11px;
+  --at-track: 0.08em;
+
+  --at-s1: 4px; --at-s2: 8px; --at-s3: 12px; --at-s4: 16px; --at-s5: 24px;
+  --at-s6: 32px; --at-s7: 48px; --at-s8: 64px; --at-s9: 96px; --at-s10: 160px;
+
+  --at-gutter: var(--at-s5);
+  --at-line: 1px;
+  --at-r: 0;
+  --at-control-h: 30px;
+
+  --at-t1: 120ms; --at-t2: 180ms; --at-t3: 260ms;
+  --at-settle: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+/* Night is the same inversion the design system makes: ink and paper trade
+   places and the accent holds, because a brand colour that changes with the
+   lights is two brand colours. It said that and then flipped the accent
+   anyway, which was the giveaway that one token was carrying two jobs. Only
+   the reading half moves now, and the lamp really does hold. */
+body[data-at-theme='night'] {
+  --at-paper: #0A0B0C;
+  --at-surface: #151515;
+  --at-panel: #060708;
+  --at-ink: #F0F0F0;
+  --at-ink-2: rgba(240, 240, 240, 0.68);
+  --at-ink-3: rgba(240, 240, 240, 0.44);
+  --at-hairline: rgba(240, 240, 240, 0.14);
+  --at-hairline-2: rgba(240, 240, 240, 0.24);
+  --at-accent-ink: #F2454E;
+  color-scheme: dark;
+}
+
+@media (max-width: 719px) { :root { --at-gutter: var(--at-s4); } }
+
+/* ---------- base ---------- */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  background: var(--at-paper);
+  color: var(--at-ink);
+  font-family: var(--at-mono);
+  font-size: var(--at-fs-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--at-t3) var(--at-settle), color var(--at-t3) var(--at-settle);
+}
+
+button, input, select { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 1px solid var(--at-accent); outline-offset: 2px; }
+
+/* The page frame. One gutter, every edge, which is the one distance the whole
+   brand keeps. Examples are pages and not apps, so they scroll. */
+.at-page { padding: var(--at-gutter); max-width: 1400px; margin: 0 auto; }
+
+/* ---------- type ---------- */
+
+.at-hero { font-size: var(--at-fs-hero); line-height: 1.05; letter-spacing: -0.015em; }
+.at-display { font-size: var(--at-fs-display); line-height: 1.2; font-weight: 400; }
+.at-lead { font-size: var(--at-fs-lead); line-height: 1.65; color: var(--at-ink-2); }
+.at-body { font-size: var(--at-fs-body); line-height: 1.7; color: var(--at-ink-2); }
+.at-caption { font-size: var(--at-fs-label); line-height: 1.5; color: var(--at-ink-3); }
+.at-label {
+  font-size: var(--at-fs-label);
+  letter-spacing: var(--at-track);
+  text-transform: uppercase;
+  color: var(--at-ink-2);
+}
+.at-label--field { color: var(--at-ink-2); text-transform: none; letter-spacing: 0; }
+.at-index { font-size: var(--at-fs-label); letter-spacing: var(--at-track); color: var(--at-ink-3); }
+
+/* ---------- layout helpers ---------- */
+
+.at-row { display: flex; align-items: center; gap: var(--at-s3); }
+
+/* ---------- icons ---------- */
+
+.at-icon { display: inline-block; width: 14px; height: 14px; flex: none; vertical-align: middle; }
+.at-icon--s { width: 12px; height: 12px; }
+
+/* A one-shot acknowledgement for an icon that just changed meaning. */
+@keyframes at-punch { from { transform: scale(0.72); } to { transform: scale(1); } }
+.at-punch { animation: at-punch var(--at-t2) var(--at-settle); }
+
+/* ---------- actions ---------- */
+
+/* Square, mono, hairline. The fill is the state: a button inverts to ink on
+   hover rather than tinting, because a tint is a shade and this system does
+   not have shades. */
+.at-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--at-s2);
+  height: var(--at-control-h);
+  padding: 0 var(--at-s3);
+  font-size: var(--at-fs-label);
+  letter-spacing: var(--at-track);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  background: transparent;
+  border: var(--at-line) solid var(--at-hairline-2);
+  border-radius: var(--at-r);
+  cursor: pointer;
+  transition: background var(--at-t2) var(--at-settle), color var(--at-t2) var(--at-settle),
+              border-color var(--at-t2) var(--at-settle), transform var(--at-t1) var(--at-settle);
+}
+.at-btn:hover { background: var(--at-ink); color: var(--at-paper); border-color: var(--at-ink); }
+.at-btn:active { transform: translateY(1px); }
+.at-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+.at-btn--primary { background: var(--at-ink); color: var(--at-paper); border-color: var(--at-ink); padding: 0 var(--at-s4); }
+.at-btn--primary:hover { background: var(--at-accent); color: var(--at-on-accent); border-color: var(--at-accent); }
+
+/* The bracketed variant: a key that says it is a key. */
+.at-btn--tag { overflow: hidden; }
+.at-btn--tag::before { content: '['; }
+.at-btn--tag::after { content: ']'; }
+
+.at-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--at-control-h);
+  height: var(--at-control-h);
+  background: transparent;
+  border: var(--at-line) solid var(--at-hairline-2);
+  border-radius: var(--at-r);
+  cursor: pointer;
+  transition: background var(--at-t2) var(--at-settle), color var(--at-t2) var(--at-settle);
+}
+.at-iconbtn:hover { background: var(--at-ink); color: var(--at-paper); }
+
+/* The sound key: pressed is a solid block, not a tint. */
+.at-soundbtn[aria-pressed='true'] { background: var(--at-ink); color: var(--at-paper); border-color: transparent; }
+
+/* The brand's switch is a slash in a box, not a lever: one diagonal that
+   rotates 90 degrees through the settle, backslash to slash. The geometry is
+   not decorative and cannot be left to default, which is how it first shipped
+   here: with no width or height the bar collapsed to a dot in the corner. The
+   0.589 is the icon set's own diagonal (7.5 to 17.5 in a 24 box is a 10-unit
+   span per axis, so the rotated line is 10 * sqrt(2) of it), tied to the
+   control height so it stays right at any size. */
+.at-switch {
+  position: relative;
+  width: var(--at-control-h);
+  height: var(--at-control-h);
+  background: transparent;
+  border: var(--at-line) solid var(--at-hairline-2);
+  border-radius: var(--at-r);
+  cursor: pointer;
+  transition: background var(--at-t2) var(--at-settle), border-color var(--at-t2) var(--at-settle);
+}
+.at-switch-slash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--at-control-h) * 0.589);
+  height: 1.25px;
+  margin-top: -0.625px;
+  margin-left: calc(var(--at-control-h) * -0.2946);
+  background: currentColor;
+  color: var(--at-ink);
+  transform-origin: 50% 50%;
+  transform: rotate(45deg);
+  transition: transform var(--at-t3) var(--at-settle), background var(--at-t2) var(--at-settle);
+}
+/* State is the fill, never a tint: on is a solid ink block with no stroke. */
+.at-switch[aria-pressed='true'] { background: var(--at-ink); border-color: transparent; }
+.at-switch[aria-pressed='true'] .at-switch-slash { transform: rotate(-45deg); color: var(--at-paper); }
+.at-switch:active .at-switch-slash { transform: rotate(45deg) scaleX(0.86); }
+.at-switch[aria-pressed='true']:active .at-switch-slash { transform: rotate(-45deg) scaleX(0.86); }
+.at-switch:focus-visible { outline: none; border-color: var(--at-accent); }
+@media (prefers-reduced-motion: reduce) { .at-switch-slash { transition: none; } }
+
+/* ---------- form controls ---------- */
+
+/* The fill is the container: no resting stroke, nothing on hover, voltage only
+   on focus. */
+.at-input,
+.at-select {
+  font-family: var(--at-mono);
+  font-size: var(--at-fs-body);
+  line-height: 1;
+  color: var(--at-ink);
+  background: var(--at-surface);
+  border: var(--at-line) solid transparent;
+  border-radius: var(--at-r);
+  height: var(--at-control-h);
+  padding: 0 var(--at-s3);
+  min-width: 0;
+  transition: border-color var(--at-t2) var(--at-settle);
+}
+.at-input:focus, .at-select:focus { outline: none; border-color: var(--at-accent); }
+.at-input::placeholder { color: var(--at-ink-3); }
+
+/* A labelled row. minmax(0, 1fr) and not a bare 1fr: a bare one cannot shrink
+   below its content, which is what put a horizontal scrollbar on the design
+   system's own specimen once. */
+.at-field { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: var(--at-s3); align-items: center; }
+.at-field--stack { grid-template-columns: minmax(0, 1fr); gap: var(--at-s2); }
+.at-field > label { font-size: var(--at-fs-label); color: var(--at-ink-2); }
+
+/* The native range input, unupgraded. The design system's dotted fader is a
+   script this gallery no longer loads, and that is fine by the component's own
+   promise: without the script the native input stays usable. */
+.at-fader { display: grid; gap: var(--at-s2); width: 100%; max-width: 320px; }
+.at-fader input[type='range'] { width: 100%; accent-color: var(--at-accent); }
+
+/* ---------- containers ---------- */
+
+.at-card {
+  padding: var(--at-s5);
+  background: var(--at-paper);
+  border: var(--at-line) solid var(--at-hairline);
+  border-radius: var(--at-r);
+}
+/* A region of controls sits on the panel fill. Surface is a control fill and
+   not a container fill, which is why this is --at-panel and not --at-surface:
+   every control assumes paper behind it, so a surface-painted panel makes its
+   own controls vanish. */
+.at-card--panel { background: var(--at-panel); border-color: transparent; }
+
+/* The pill that holds a cluster. */
+.at-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--at-s3);
+  padding: var(--at-s2) var(--at-s3);
+  border: var(--at-line) solid var(--at-hairline-2);
+  border-radius: var(--at-r);
+}
+.at-group--accent { border-color: var(--at-accent-ink); color: var(--at-accent-ink); }
+
+.at-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--at-s1);
+  padding: 2px var(--at-s2);
+  font-size: var(--at-fs-label);
+  letter-spacing: var(--at-track);
+  text-transform: uppercase;
+  background: var(--at-surface);
+  border-radius: var(--at-r);
+  white-space: nowrap;
+}
+.at-chip--line { background: transparent; border: var(--at-line) solid var(--at-hairline-2); }
+
+/* Spec-sheet value rows: a name, a dotted leader, a value. The leader sits on
+   the baseline, because a leader is the type continuing by other means, so it
+   starts where the type sits. Centred it runs through the middle of the words
+   at either end and reads as a rule that happened to be there. */
+.at-readout { display: grid; gap: var(--at-s2); }
+.at-leaders {
+  display: flex;
+  align-items: baseline;
+  align-content: center;
+  gap: var(--at-s2);
+  font-size: var(--at-fs-label);
+  letter-spacing: var(--at-track);
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.at-leaders-fill { flex: 1; border-bottom: var(--at-line) dotted var(--at-hairline-2); }
+.at-leaders .at-icon { align-self: center; }
+
+/* ---------- toasts ---------- */
+
+.at-toaststack { display: grid; gap: var(--at-s2); width: 320px; justify-items: stretch; }
+.at-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--at-s3);
+  padding: var(--at-s3) var(--at-s4);
+  background: var(--at-paper);
+  border: var(--at-line) solid var(--at-hairline-2);
+  border-radius: var(--at-r);
+  font-size: var(--at-fs-label);
+  animation: at-toast-in var(--at-t3) var(--at-settle);
+}
+@keyframes at-toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.at-toast .msg { flex: 1; min-width: 0; color: var(--at-ink); }
+/* time takes its own token rather than inheriting, since the error toast sets
+   colour for the whole container and would otherwise drag this with it. */
+.at-toast time { color: var(--at-ink-3); font-variant-numeric: tabular-nums; }
+.at-toast--leaving { opacity: 0; transform: translateY(4px); transition: opacity var(--at-t3) var(--at-settle), transform var(--at-t3) var(--at-settle); }
+
+/* Error is the one thing on the page that inverts: the tier that has to be
+   seen gets the block, and the others stay quiet. Its own on-ink ramp, because
+   a container that sets colour has to restate what sits inside it. */
+.at-toast--error {
+  background: var(--at-ink);
+  color: var(--at-paper);
+  border-color: transparent;
+}
+.at-toast--error .msg { color: var(--at-paper); }
+.at-toast--error time { color: rgba(255, 255, 255, 0.55); }
+body[data-at-theme='night'] .at-toast--error time { color: rgba(10, 11, 12, 0.55); }
+
+.at-dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; }
+.at-dot--ring { background: transparent; box-shadow: inset 0 0 0 1px currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .at-toast { animation: none; }
+  .at-punch { animation: none; }
+}
+
+/* ---------- the gallery's own furniture ---------- */
+
+header.bar { display: flex; justify-content: space-between; align-items: center; gap: var(--at-s4); }
+.bar-group { display: flex; align-items: center; gap: var(--at-s3); }
+
+/* The lead block: what this page is, in one screen of type, before anything
+   makes a sound. */
+.lead-block { padding: var(--at-s8) 0 var(--at-s7); max-width: 62ch; }
+.lead-block .at-hero { margin-top: var(--at-s3); }
+.lead-block .at-lead { margin-top: var(--at-s4); }
+
+/* A demo section: the label, the thing, and the code that made it. */
+.demo { margin-top: clamp(var(--at-s7), 8vw, var(--at-s8)); }
+.demo > .at-display { margin-top: var(--at-s3); }
+.demo > .at-body { margin-top: var(--at-s3); max-width: 62ch; }
+
+/* Stage and source, side by side where there is room and stacked where there
+   is not. The stage leads, because the point is the sound and not the listing. */
+.split {
+  margin-top: var(--at-s5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--at-s5);
+  align-items: start;
+}
+@media (min-width: 1000px) {
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--at-s6); }
+}
+
+.stage { display: flex; flex-direction: column; gap: var(--at-s4); align-items: flex-start; }
+.stage .at-row { flex-wrap: wrap; gap: var(--at-s3); }
+
+.code {
+  padding: var(--at-s4) var(--at-s5);
+  background: var(--at-surface);
+  border-radius: var(--at-r);
+  font-family: var(--at-mono);
+  font-size: var(--at-fs-body);
+  line-height: 1.7;
+  color: var(--at-ink);
+  overflow-x: auto;
+  white-space: pre;
+}
+.code .cmt { color: var(--at-ink-3); }
+
+/* The gallery cover's four cards. Auto-fit, so a wide display buys columns. */
+.cards {
+  margin-top: var(--at-s7);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: var(--at-s5);
+}
+.cards .at-card { display: flex; flex-direction: column; gap: var(--at-s3); align-items: flex-start; }
+.cards .at-card .at-body { flex: 1; }
+
+/* The banner for the one thing that can go wrong here: the package is not
+   built, so the module import 404s and nothing on the page works. Silence with
+   no explanation is the worst failure a sound page can have. */
+.nobuild { margin-top: var(--at-s5); max-width: 62ch; }
+
+footer.foot { margin-top: clamp(var(--at-s9), 11vw, var(--at-s10)); }
+
+/* The toast rail, on the gutter like every other fixed rail. */
+.toastrail { position: fixed; right: var(--at-gutter); bottom: var(--at-gutter); z-index: 40; }
+
+.hint { transition: opacity var(--at-t3) var(--at-settle); }
+.hint.gone { opacity: 0; pointer-events: none; }
+
+/* Compact. The arm hint is the first thing cut: the bar cannot hold a sentence
+   and two switches at this width, and on a touch device the first tap arms
+   sound before the hint could be read. Without this the bar overran by 153px
+   at 390 and pushed the sound key off the screen, which is the exact failure
+   the house rule already covers: an off switch that cannot be reached is not
+   an off switch. */
+@media (max-width: 1119px) {
+  .hint { display: none; }
+}
+@media (max-width: 719px) {
+  header.bar { flex-wrap: wrap; }
+  .toastrail { left: var(--at-gutter); }
+  .at-toaststack { width: auto; }
+  .lead-block { padding-top: var(--at-s6); }
+}

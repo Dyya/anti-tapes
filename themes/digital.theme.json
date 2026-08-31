@@ -1,0 +1,31 @@
+{
+  "name": "Anti digital",
+  "key": {
+    "root": "A",
+    "scale": "minorPentatonic",
+    "octaves": [4, 7]
+  },
+  "timbre": {
+    "neutral": "triangle",
+    "secondary": "square",
+    "charged": "sawtooth",
+    "brightness": 5200,
+    "articulation": "chirp"
+  },
+  "material": {
+    "type": "none",
+    "amount": 0
+  },
+  "envelope": {
+    "firmness": 0.85,
+    "release": 0.3
+  },
+  "gain": {
+    "voice": 0.08,
+    "master": 0.9
+  },
+  "etiquette": {
+    "repetition": 0.6
+  },
+  "events": {}
+}

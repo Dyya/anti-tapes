@@ -1,0 +1,34 @@
+{
+  "name": "Anti tape",
+  "key": {
+    "root": "D",
+    "scale": "minorPentatonic",
+    "octaves": [3, 6]
+  },
+  "timbre": {
+    "neutral": "noise",
+    "secondary": "sine",
+    "charged": "noise",
+    "brightness": 3200,
+    "articulation": "none"
+  },
+  "material": {
+    "type": "felt",
+    "amount": 0.5
+  },
+  "envelope": {
+    "firmness": 0.45,
+    "release": 0.5
+  },
+  "gain": {
+    "voice": 0.11,
+    "master": 0.9
+  },
+  "etiquette": {
+    "repetition": 0.5
+  },
+  "signature": {
+    "seed": 0
+  },
+  "events": {}
+}

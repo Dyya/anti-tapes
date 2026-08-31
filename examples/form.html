@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anti examples - A form</title>
+<meta name="description" content="One form surface: focus as position, validation as a verdict, a save as a progress run, and the parts that stay deliberately silent.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="gallery.css">
+<style>
+  .form { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: var(--at-s5); }
+  .form .at-input { width: 100%; }
+  .field-msg { min-height: 14px; }
+  .field-msg.bad { color: var(--at-accent-ink); }
+
+  /* The suggestion list: options that tick as the highlight moves through
+     them, and commit low when one is taken. */
+  .sug { position: relative; }
+  .sug-list {
+    position: absolute;
+    z-index: 5;
+    left: 0; right: 0; top: calc(100% + 4px);
+    background: var(--at-paper);
+    border: var(--at-line) solid var(--at-hairline-2);
+    border-radius: var(--at-r);
+    padding: 4px;
+    display: none;
+  }
+  .sug-list.open { display: block; }
+  .sug-item {
+    padding: 6px var(--at-s3);
+    font-family: var(--at-mono);
+    font-size: var(--at-fs-body);
+    color: var(--at-ink-2);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .sug-item.on { background: var(--at-accent); color: var(--at-on-accent); }
+</style>
+
+<script type="importmap">
+{ "imports": { "anti-tapes": "../dist/anti.mjs" } }
+</script>
+</head>
+
+<body class="at">
+
+<div class="at-page">
+
+  <header class="bar">
+    <span class="bar-group">
+      <a class="at-group" href="index.html">
+        <svg class="at-icon" aria-hidden="true"><use href="#at-mark"></use></svg>
+        Anti examples
+      </a>
+      <span class="at-chip at-chip--line">A form</span>
+    </span>
+    <span class="bar-group">
+      <span class="at-group at-group--accent hint" id="hint">
+        <svg class="at-icon at-icon--s" aria-hidden="true"><use href="#at-sound"></use></svg>
+        <span>Click anywhere to arm sound</span>
+      </span>
+      <button class="at-iconbtn at-soundbtn" id="soundflip" aria-pressed="true" aria-label="Sound">
+        <svg class="at-icon at-icon--s" id="soundflip-ico"><use href="#at-sound"></use></svg>
+      </button>
+      <button class="at-switch" id="themeflip" aria-pressed="false" aria-label="Night theme">
+        <span class="at-switch-slash"></span>
+      </button>
+    </span>
+  </header>
+
+  <section class="lead-block">
+    <span class="at-index">example / a form</span>
+    <h1 class="at-hero">The surface everyone ships, with a voice.</h1>
+    <p class="at-lead">A form is where sound is most often done badly, because the temptation is to score every keystroke. Nearly all of it is judgment about which existing pair applies, and the hardest calls are the ones that end in silence.</p>
+    <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
+      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">01</span>
+    <h2 class="at-display">Fill it in</h2>
+    <p class="at-body">Tab between the fields, get the email wrong on purpose, take a suggestion with the arrow keys, then save. Six decisions are in here and four of them are about restraint.</p>
+
+    <div class="split">
+      <div class="stage">
+        <form class="form" id="form" novalidate>
+          <div class="at-field at-field--stack">
+            <label class="at-label at-label--field" for="email">Email</label>
+            <input class="at-input" id="email" type="email" placeholder="you@studio.com" autocomplete="off">
+            <span class="at-caption field-msg" id="email-msg"></span>
+          </div>
+
+          <div class="at-field at-field--stack sug">
+            <label class="at-label at-label--field" for="company">Company</label>
+            <input class="at-input" id="company" type="text" placeholder="Start typing" autocomplete="off"
+                   role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="sug-list">
+            <span class="at-caption field-msg" id="company-msg"></span>
+            <div class="sug-list" id="sug-list" role="listbox" aria-label="Suggestions"></div>
+          </div>
+
+          <div class="at-field at-field--stack">
+            <label class="at-label at-label--field" for="plan">Plan</label>
+            <select class="at-select" id="plan">
+              <option value="personal">Personal</option>
+              <option value="commercial">Commercial</option>
+              <option value="bespoke">Bespoke</option>
+            </select>
+          </div>
+
+          <div class="at-row" style="gap: var(--at-s3); flex-wrap: wrap">
+            <button class="at-btn at-btn--primary" id="save" type="submit">Save</button>
+            <button class="at-btn" id="reset" type="button">Reset</button>
+            <span class="at-chip at-chip--line" id="hover-help" title="A tooltip is silent">What is a plan?</span>
+          </div>
+
+          <div class="at-readout">
+            <div class="at-leaders"><span>Last event</span><span class="at-leaders-fill"></span><b id="last">none</b></div>
+            <div class="at-leaders"><span>Save</span><span class="at-leaders-fill"></span><b id="savestate">idle</b></div>
+          </div>
+        </form>
+      </div>
+
+      <pre class="code"><span class="cmt">// Focus moved. Position, not action: the same
+// event a detent and an insertion point get.</span>
+input.addEventListener('focus', () =&gt; Anti.play('tick'))
+
+<span class="cmt">// Typing is SILENT here. The keys example scores
+// every character because typing is what that
+// surface is about; in a form it is what you do
+// on the way to the thing you came for.</span>
+
+<span class="cmt">// A verdict, and only on blur. Validating while
+// someone is still typing is telling them they
+// are wrong before they have finished speaking.</span>
+input.addEventListener('blur', () =&gt; {
+  if (!input.value) return              <span class="cmt">// untouched</span>
+  if (!valid(input.value)) Anti.play('reject')
+  <span class="cmt">// and a valid field says NOTHING. Silence is
+  // the default state, and correct is expected.</span>
+})
+
+<span class="cmt">// The save is a run that resolves, not a spinner
+// with a ping at the end.</span>
+Anti.progress.start('save', 0)
+Anti.progress.done('save')
+toast('success', 'Saved')</pre>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">02</span>
+    <h2 class="at-display">The four that stay quiet</h2>
+    <p class="at-body">Restraint is most of the work, and it is the part a demo cannot show by playing something. Each of these was a deliberate call.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-readout" style="max-width: 460px">
+          <div class="at-leaders"><span>Typing</span><span class="at-leaders-fill"></span><b>silent</b></div>
+          <div class="at-leaders"><span>A valid field on blur</span><span class="at-leaders-fill"></span><b>silent</b></div>
+          <div class="at-leaders"><span>Hovering the help chip</span><span class="at-leaders-fill"></span><b>silent</b></div>
+          <div class="at-leaders"><span>The disabled save</span><span class="at-leaders-fill"></span><b>silent</b></div>
+        </div>
+        <p class="at-caption">Hover the help chip and listen: nothing. The user did not act, they rested, and resting is not an event.</p>
+      </div>
+      <pre class="code"><span class="cmt">// A tooltip is the clearest case in the grammar.
+// Every other layer (popover, modal, confirm) is
+// opened BY somebody. A tooltip appears because a
+// pointer stopped moving, which is not a decision,
+// and scoring it makes the interface twitch at
+// people who are reading.
+
+// The disabled control is the same argument from
+// the other end: nothing happened. A control that
+// refuses OUT LOUD is a different state, a locked
+// one, and it earns its reject because a refusal
+// is an answer.</span></pre>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="at-body"><a class="at-btn at-btn--tag" href="index.html">All examples</a></p>
+  </footer>
+
+</div>
+
+<div class="toastrail"><div class="at-toaststack" id="toasts" role="status" aria-live="polite" aria-atomic="false" aria-label="Notifications"></div></div>
+
+
+<script type="module">
+  import Anti from 'anti-tapes';
+  import { mountChrome, toast } from './chrome.js';
+
+  const el = (id) => document.getElementById(id);
+  const say = (n) => { el('last').textContent = n; };
+
+  // ---- focus is position ----
+  // The same event a detent, an insertion point and a d-pad step get: quieter
+  // and shorter than a grab, felt more than heard.
+  ['email', 'company', 'plan'].forEach((id) => {
+    el(id).addEventListener('focus', () => { Anti.play('tick'); say('tick (focus)'); });
+  });
+
+  // ---- validation is a verdict, and it waits ----
+  const valid = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+  el('email').addEventListener('blur', () => {
+    const v = el('email').value.trim();
+    const msg = el('email-msg');
+    if (!v) { msg.textContent = ''; msg.classList.remove('bad'); return; }
+    if (valid(v)) {
+      // Correct is what was expected. Saying so is congratulating someone for
+      // spelling their own address right.
+      msg.textContent = ''; msg.classList.remove('bad');
+      return;
+    }
+    msg.textContent = 'That address is not complete';
+    msg.classList.add('bad');
+    Anti.play('reject');
+    say('reject (invalid)');
+  });
+
+  // ---- the suggestion list ----
+  const COMPANIES = ['Anti Tapes', 'Antenna Studio', 'Anthem Works', 'Apparatus', 'Atelier Nine'];
+  const input = el('company'), list = el('sug-list');
+  let items = [], cursor = -1;
+
+  function close() {
+    list.classList.remove('open');
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    items = []; cursor = -1;
+  }
+
+  function open(matches) {
+    list.innerHTML = '';
+    matches.forEach((name, i) => {
+      const d = document.createElement('div');
+      d.className = 'sug-item';
+      d.id = 'sug-opt-' + i;
+      d.setAttribute('role', 'option');
+      d.textContent = name;
+      d.addEventListener('mousedown', (e) => { e.preventDefault(); take(i); });
+      list.appendChild(d);
+    });
+    items = [...list.children];
+    cursor = -1;
+    list.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  function move(step) {
+    if (!items.length) return;
+    cursor = (cursor + step + items.length) % items.length;
+    items.forEach((n, i) => {
+      n.classList.toggle('on', i === cursor);
+      n.setAttribute('aria-selected', String(i === cursor));
+    });
+    // The highlight the ear follows is exposed to a screen reader too: the
+    // combobox pattern's active descendant, pointing at the marked option.
+    input.setAttribute('aria-activedescendant', items[cursor].id);
+    // Moving through a list is the same positional event as moving between
+    // fields, pitched by where in the list you are: the sound says how far
+    // down you have got without anyone counting.
+    Anti.play('tick', { value: items.length < 2 ? 0.5 : cursor / (items.length - 1) });
+    say('tick (list)');
+  }
+
+  function take(i) {
+    input.value = items[i].textContent;
+    close();
+    // Taking a suggestion is a small commit, so it lands low. A full-height
+    // commit here would sound like the form was submitted.
+    Anti.play('commit', { value: 0.3 });
+    say('commit (accepted)');
+  }
+
+  input.addEventListener('input', () => {
+    const v = input.value.trim().toLowerCase();
+    // Typing itself is silent. The list appearing is not an event either: it
+    // is the interface catching up with the user, not the user acting.
+    if (!v) return close();
+    const matches = COMPANIES.filter((c) => c.toLowerCase().startsWith(v));
+    if (!matches.length) return close();
+    open(matches);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (!list.classList.contains('open')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter' && cursor >= 0) { e.preventDefault(); take(cursor); }
+    else if (e.key === 'Escape') { close(); Anti.play('release'); say('release (dismissed)'); }
+  });
+
+  input.addEventListener('blur', close);
+
+  // ---- the plan menu ----
+  el('plan').addEventListener('change', () => { Anti.play('commit', { value: 0.4 }); say('commit (choice)'); });
+
+  // ---- the save, as a run ----
+  let saving = false;
+
+  el('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (saving) return;
+
+    const v = el('email').value.trim();
+    if (!valid(v)) {
+      // The form refusing as a whole is louder than one field refusing, so it
+      // goes up a tier: this is an outcome, not a note in the margin.
+      el('email-msg').textContent = 'An email is needed to save';
+      el('email-msg').classList.add('bad');
+      toast('error', 'Could not save');
+      say('error (save refused)');
+      return;
+    }
+
+    saving = true;
+    el('save').disabled = true;
+    el('savestate').textContent = 'saving';
+    say('progress');
+
+    let p = 0;
+    Anti.progress.start('save', 0);
+    const run = setInterval(() => {
+      p = Math.min(1, p + 0.12);
+      Anti.progress.set('save', p);
+      if (p >= 1) {
+        clearInterval(run);
+        // The run resolves. The toast is the receipt, not the sound of the
+        // save: the save already said what it did.
+        Anti.progress.done('save');
+        el('savestate').textContent = 'saved';
+        el('save').disabled = false;
+        saving = false;
+        toast('success', 'Details saved');
+        say('progress.done');
+      }
+    }, 180);
+  });
+
+  el('reset').addEventListener('click', () => {
+    el('form').reset();
+    el('email-msg').textContent = '';
+    el('email-msg').classList.remove('bad');
+    el('savestate').textContent = 'idle';
+    close();
+    // Undo, at the take-back. A reset is a deletion of everything, so it gets
+    // the grammar's one reversed envelope rather than a commit.
+    Anti.play('undo');
+    say('undo (reset)');
+  });
+
+  // The help chip is deliberately not wired. Hovering it is silent, and that
+  // is the point of it being on the page.
+
+  window.addEventListener('pagehide', () => Anti.silence());
+
+  mountChrome();
+</script>
+
+<script>
+  setTimeout(function () {
+    if (!window.__antiExample) document.getElementById('nobuild').hidden = false;
+  }, 1000);
+</script>
+
+</body>
+</html>

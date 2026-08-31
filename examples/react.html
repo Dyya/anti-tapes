@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anti examples - React</title>
+<meta name="description" content="Two hooks: a drag that cleans up after itself, and a view change that cannot leave a voice held.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="gallery.css">
+<style>
+  .tabs { display: flex; gap: var(--at-s2); }
+  .app { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: var(--at-s4); }
+  .app input[type=range] { width: 100%; }
+</style>
+
+<!-- React and htm come from a CDN because this page has no build step, the
+     same way everything else in this repo has none. In an app, React is
+     already there and htm is not needed at all: the components below are
+     ordinary JSX with the backticks taken off. -->
+<script type="importmap">
+{
+  "imports": {
+    "anti-tapes": "../dist/anti.mjs",
+    "react": "https://esm.sh/react@19.1.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.1.0/client",
+    "htm/react": "https://esm.sh/htm@3.1.1/react?deps=react@19.1.0"
+  }
+}
+</script>
+</head>
+
+<body class="at">
+
+<div class="at-page">
+
+  <header class="bar">
+    <span class="bar-group">
+      <a class="at-group" href="index.html">
+        <svg class="at-icon" aria-hidden="true"><use href="#at-mark"></use></svg>
+        Anti examples
+      </a>
+      <span class="at-chip at-chip--line">React</span>
+    </span>
+    <span class="bar-group">
+      <span class="at-group at-group--accent hint" id="hint">
+        <svg class="at-icon at-icon--s" aria-hidden="true"><use href="#at-sound"></use></svg>
+        <span>Click anywhere to arm sound</span>
+      </span>
+      <button class="at-iconbtn at-soundbtn" id="soundflip" aria-pressed="true" aria-label="Sound">
+        <svg class="at-icon at-icon--s" id="soundflip-ico"><use href="#at-sound"></use></svg>
+      </button>
+      <button class="at-switch" id="themeflip" aria-pressed="false" aria-label="Night theme">
+        <span class="at-switch-slash"></span>
+      </button>
+    </span>
+  </header>
+
+  <section class="lead-block">
+    <span class="at-index">example / react</span>
+    <h1 class="at-hero">Two hooks, and the bug they exist to prevent.</h1>
+    <p class="at-lead">The engine has no React binding and does not need one: it is a module you import and call. What React does change is who is responsible for stopping a sound, because a component can vanish in the middle of a gesture.</p>
+    <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
+      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+    </div>
+    <div class="at-card at-card--panel nobuild" id="nocdn" hidden>
+      <p class="at-body">React could not be fetched from the CDN, so this page cannot render. The other three examples have no network dependency and will still run.</p>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">01</span>
+    <h2 class="at-display">A drag that cleans up after itself</h2>
+    <p class="at-body">Drag the fader, and while still holding it, press one of the view buttons. In a naive implementation the drone outlives the component that started it and the page hums until it is reloaded. Here the effect's cleanup stops the run, and the view change calls <code>Anti.silence()</code> on the way out.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div id="root" class="app"></div>
+      </div>
+      <pre class="code"><span class="cmt">// useDrone.js</span>
+import { useEffect, useRef } from 'react'
+import Anti from 'anti-tapes'
+
+export function useDrone(id) {
+  const held = useRef(false)
+
+  <span class="cmt">// The whole reason this is a hook. A component can
+  // unmount mid-gesture (a route change, a filtered
+  // list, a modal closing over it) and the pointerup
+  // that would have ended the drag never arrives at
+  // anything that still exists.</span>
+  useEffect(() =&gt; () =&gt; {
+    if (held.current) Anti.drone.stop(id)
+  }, [id])
+
+  return {
+    start(v) { held.current = true; Anti.drone.start(id, v) },
+    move(v)  { if (held.current) Anti.drone.move(id, v) },
+    stop()   { if (!held.current) return
+               held.current = false; Anti.drone.stop(id) }
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">02</span>
+    <h2 class="at-display">What the engine already handles, and what it cannot</h2>
+    <p class="at-body">Most of the integration questions React raises turn out to be answered in the engine, because it is a module with its own state rather than a component tree. Two are genuinely yours.</p>
+
+    <div class="split">
+      <div class="stage">
+        <div class="at-readout" style="max-width: 520px">
+          <div class="at-leaders"><span>Import in a server render</span><span class="at-leaders-fill"></span><b>safe</b></div>
+          <div class="at-leaders"><span>Imported twice, two components</span><span class="at-leaders-fill"></span><b>one engine</b></div>
+          <div class="at-leaders"><span>StrictMode double effects</span><span class="at-leaders-fill"></span><b>safe</b></div>
+          <div class="at-leaders"><span>Unmount mid-gesture</span><span class="at-leaders-fill"></span><b>yours</b></div>
+          <div class="at-leaders"><span>Leaving a view mid-gesture</span><span class="at-leaders-fill"></span><b>yours</b></div>
+        </div>
+        <p class="at-caption">Drone and progress runs are keyed by an id you choose, so starting one twice moves the existing run rather than stacking a second voice on it. That is what makes a double-invoked effect harmless.</p>
+      </div>
+      <pre class="code"><span class="cmt">// The route-change contract. One call, and nothing
+// that was held by the view being left is still
+// ringing over the view being entered.</span>
+
+useEffect(() =&gt; {
+  return () =&gt; Anti.silence()
+}, [route])
+
+<span class="cmt">// Importing on the server is silent, not fatal: the
+// engine arms itself on the first user gesture and
+// no-ops before there is one, so there is nothing to
+// guard and no dynamic import to arrange.</span>
+import Anti from 'anti-tapes'</pre>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="at-body"><a class="at-btn at-btn--tag" href="index.html">All examples</a></p>
+  </footer>
+
+</div>
+
+<div class="toastrail"><div class="at-toaststack" id="toasts" role="status" aria-live="polite" aria-atomic="false" aria-label="Notifications"></div></div>
+
+
+<script type="module">
+  import { useState, useRef, useEffect } from 'react';
+  import { createRoot } from 'react-dom/client';
+  import { html } from 'htm/react';
+  import Anti from 'anti-tapes';
+  import { mountChrome, toast } from './chrome.js';
+
+  window.__reactUp = true;
+
+  // ---- the hook ----
+  // Everything here is ordinary React. The engine is a module with its own
+  // state, so there is no provider, no context, and no instance to thread
+  // through the tree.
+  function useDrone(id) {
+    const held = useRef(false);
+
+    // The reason this is a hook at all: a component can unmount in the middle
+    // of a gesture, and the pointerup that would have ended it never reaches
+    // anything that still exists.
+    useEffect(() => () => {
+      if (held.current) Anti.drone.stop(id);
+    }, [id]);
+
+    return {
+      start(v) { held.current = true; Anti.drone.start(id, v); },
+      move(v) { if (held.current) Anti.drone.move(id, v); },
+      stop() {
+        if (!held.current) return;
+        held.current = false;
+        Anti.drone.stop(id);
+      }
+    };
+  }
+
+  function Mixer() {
+    const [level, setLevel] = useState(0.5);
+    const drone = useDrone('mixer');
+
+    useEffect(() => {
+      const end = () => drone.stop();
+      window.addEventListener('pointerup', end);
+      window.addEventListener('pointercancel', end);
+      return () => {
+        window.removeEventListener('pointerup', end);
+        window.removeEventListener('pointercancel', end);
+      };
+    });
+
+    return html`
+      <div class="at-fader">
+        <div class="at-leaders">
+          <span>Level</span><span class="at-leaders-fill"></span>
+          <b>${level.toFixed(2)}</b>
+        </div>
+        <input
+          type="range" min="0" max="1" step="0.001" value=${level} aria-label="Level"
+          onPointerDown=${() => drone.start(level)}
+          onChange=${(e) => {
+            const v = parseFloat(e.target.value);
+            setLevel(v);
+            drone.move(v);
+          }} />
+      </div>`;
+  }
+
+  function Sender() {
+    const [sending, setSending] = useState(false);
+
+    // A run keyed by id, so a double-invoked effect in StrictMode moves the
+    // existing run instead of stacking a second voice on top of it.
+    useEffect(() => {
+      if (!sending) return;
+      let p = 0;
+      Anti.progress.start('send', 0);
+      const t = setInterval(() => {
+        p = Math.min(1, p + 0.14);
+        Anti.progress.set('send', p);
+        if (p >= 1) {
+          clearInterval(t);
+          Anti.progress.done('send');
+          setSending(false);
+          toast('success', 'Sent');
+        }
+      }, 200);
+      // Cleanup abandons the run rather than resolving it, because a component
+      // going away is not the same as the work finishing.
+      return () => { clearInterval(t); Anti.progress.stop('send'); };
+    }, [sending]);
+
+    return html`
+      <button class="at-btn at-btn--primary" disabled=${sending} onClick=${() => setSending(true)}>
+        ${sending ? 'Sending' : 'Send'}
+      </button>`;
+  }
+
+  function App() {
+    const [view, setView] = useState('mixer');
+
+    // The route-change contract: nothing held by the view being left is still
+    // ringing over the view being entered.
+    useEffect(() => () => Anti.silence(), [view]);
+
+    return html`
+      <div class="app">
+        <div class="tabs">
+          ${['mixer', 'send'].map((v) => html`
+            <button
+              key=${v}
+              class=${'at-btn' + (v === view ? ' at-btn--primary' : '')}
+              onClick=${() => {
+                if (v === view) return;
+                setView(v);
+                Anti.play('tick');
+              }}>
+              ${v === 'mixer' ? 'Mixer' : 'Send'}
+            </button>`)}
+        </div>
+        ${view === 'mixer' ? html`<${Mixer} />` : html`<${Sender} />`}
+        <p class="at-caption">
+          Start dragging the fader, and switch view without letting go. The drone stops
+          with the component that owned it.
+        </p>
+      </div>`;
+  }
+
+  createRoot(document.getElementById('root')).render(html`<${App} />`);
+  mountChrome();
+</script>
+
+<script>
+  setTimeout(function () {
+    if (!window.__antiExample) document.getElementById('nobuild').hidden = false;
+    // The engine is local; React is not. Two different failures, so two
+    // different explanations.
+    if (!window.__reactUp) document.getElementById('nocdn').hidden = false;
+  }, 2500);
+</script>
+
+</body>
+</html>

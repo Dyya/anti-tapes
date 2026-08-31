@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Anti examples</title>
+<meta name="description" content="Four pages, each mapping one interaction family onto the grammar, all written against the anti-tapes package.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="gallery.css">
+
+<script type="importmap">
+{ "imports": { "anti-tapes": "../dist/anti.mjs" } }
+</script>
+</head>
+
+<body class="at">
+
+<div class="at-page">
+
+  <header class="bar">
+    <span class="bar-group">
+      <span class="at-group">
+        <svg class="at-icon" aria-hidden="true"><use href="#at-mark"></use></svg>
+        Anti examples
+      </span>
+    </span>
+    <span class="bar-group">
+      <span class="at-group at-group--accent hint" id="hint">
+        <svg class="at-icon at-icon--s" aria-hidden="true"><use href="#at-sound"></use></svg>
+        <span>Click anywhere to arm sound</span>
+      </span>
+      <button class="at-iconbtn at-soundbtn" id="soundflip" aria-pressed="true" aria-label="Sound">
+        <svg class="at-icon at-icon--s" id="soundflip-ico"><use href="#at-sound"></use></svg>
+      </button>
+      <button class="at-switch" id="themeflip" aria-pressed="false" aria-label="Night theme">
+        <span class="at-switch-slash"></span>
+      </button>
+    </span>
+  </header>
+
+  <section class="lead-block">
+    <span class="at-index">examples</span>
+    <h1 class="at-hero">Eleven events cover an interface.</h1>
+    <p class="at-lead">That is the claim, and these four pages are the proof rather than the argument. Each takes one interaction family, maps it onto the grammar the engine already has, and says out loud which calls were judgment rather than mechanics.</p>
+    <p class="at-body" style="margin-top: var(--at-s5)">All four import the package the way an app does, with a bare <code>anti-tapes</code> specifier. The only line here that is about this repo is the import map that resolves it, and in your app your bundler does that instead.</p>
+    <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
+      <p class="at-body">These pages import the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+    </div>
+  </section>
+
+  <section class="cards">
+    <article class="at-card">
+      <span class="at-index">01</span>
+      <h2 class="at-display">Plain DOM</h2>
+      <p class="at-body">Attribute binding, a mechanism's grab and verdict, the drone gesture, a progress run that resolves, and the notification tier. No framework, no build.</p>
+      <a class="at-btn at-btn--primary" href="vanilla.html">Open</a>
+    </article>
+
+    <article class="at-card">
+      <span class="at-index">02</span>
+      <h2 class="at-display">Keys</h2>
+      <p class="at-body">Typing on the letter ladder, and backspace as the one reversed envelope in the grammar. The oldest experiment here and the one that earned undo its own event.</p>
+      <a class="at-btn at-btn--primary" href="keys.html">Open</a>
+    </article>
+
+    <article class="at-card">
+      <span class="at-index">03</span>
+      <h2 class="at-display">A form</h2>
+      <p class="at-body">Focus as position, validation as a verdict that waits for blur, a save as a run rather than a spinner, and the four places that stay deliberately silent.</p>
+      <a class="at-btn at-btn--primary" href="form.html">Open</a>
+    </article>
+
+    <article class="at-card">
+      <span class="at-index">04</span>
+      <h2 class="at-display">React</h2>
+      <p class="at-body">Two hooks and the bug they prevent: a component that unmounts mid-drag, and a view change that would otherwise leave a voice held over the next screen.</p>
+      <a class="at-btn at-btn--primary" href="react.html">Open</a>
+    </article>
+  </section>
+
+  <section class="demo">
+    <span class="at-index">on running these</span>
+    <h2 class="at-display">These are the one thing here that needs a server</h2>
+    <p class="at-body">Every other surface in this project opens straight from the filesystem. These do not, and the reason is the point of them: they import the package over a bare specifier, which browsers only resolve over http. <code>./serve.sh</code> builds the package and serves the repo in one command.</p>
+    <pre class="code">./serve.sh
+<span class="cmt"># then http://localhost:8477/examples/</span></pre>
+  </section>
+
+  <footer class="foot">
+    <p class="at-body">The engine is MIT. The studio, where a theme is designed by ear rather than by hand, is at <a href="https://anti.fyi">anti.fyi</a>.</p>
+  </footer>
+
+</div>
+
+
+<script type="module">
+  import Anti from 'anti-tapes';
+  import { mountChrome } from './chrome.js';
+
+  // The cards are links, so they take the grammar the same way every other
+  // link in this system does: by attribute.
+  document.querySelectorAll('.cards .at-btn').forEach((a) => a.setAttribute('data-anti', 'commit'));
+  Anti.bind();
+
+  mountChrome();
+</script>
+
+<script>
+  setTimeout(function () {
+    if (!window.__antiExample) document.getElementById('nobuild').hidden = false;
+  }, 1000);
+</script>
+
+</body>
+</html>

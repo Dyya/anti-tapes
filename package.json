@@ -1,0 +1,70 @@
+{
+  "name": "anti-tapes",
+  "version": "0.9.5",
+  "description": "Interaction sound as a system, not a pile of clicks. A tiny, dependency-free Web Audio engine that renders a fixed event grammar from one theme object. Synthesis only, no assets.",
+  "keywords": [
+    "sound",
+    "audio",
+    "web-audio",
+    "ui-sound",
+    "interaction-design",
+    "sound-design",
+    "synthesis",
+    "haptics",
+    "feedback",
+    "design-system"
+  ],
+  "homepage": "https://anti.fyi",
+  "license": "MIT",
+  "author": "Anti Tapes",
+  "main": "./dist/anti.cjs",
+  "module": "./dist/anti.mjs",
+  "types": "./dist/anti.d.ts",
+  "unpkg": "./dist/anti.js",
+  "jsdelivr": "./dist/anti.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/anti.d.mts",
+        "default": "./dist/anti.mjs"
+      },
+      "require": {
+        "types": "./dist/anti.d.cts",
+        "default": "./dist/anti.cjs"
+      },
+      "script": "./dist/anti.js",
+      "default": "./dist/anti.mjs"
+    },
+    "./schema": {
+      "import": {
+        "types": "./dist/anti-schema.d.mts",
+        "default": "./dist/anti-schema.mjs"
+      },
+      "require": {
+        "types": "./dist/anti-schema.d.cts",
+        "default": "./dist/anti-schema.cjs"
+      },
+      "script": "./dist/anti-schema.js",
+      "default": "./dist/anti-schema.mjs"
+    },
+    "./themes/*": "./themes/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "themes",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node tools/build-package.js",
+    "prepublishOnly": "node tools/build-package.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dyya/anti-tapes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dyya/anti-tapes/issues"
+  }
+}

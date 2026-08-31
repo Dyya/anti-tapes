@@ -1,0 +1,27 @@
+{
+  "name": "Anti glass",
+  "key": {
+    "root": "E",
+    "scale": "majorPentatonic",
+    "octaves": [4, 7]
+  },
+  "timbre": {
+    "neutral": "sine",
+    "secondary": "triangle",
+    "charged": "square",
+    "brightness": 4200
+  },
+  "material": {
+    "type": "glass",
+    "amount": 0.8
+  },
+  "envelope": {
+    "firmness": 0.7,
+    "release": 0.5
+  },
+  "gain": {
+    "voice": 0.09,
+    "master": 0.9
+  },
+  "events": {}
+}
