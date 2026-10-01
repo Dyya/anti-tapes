@@ -87,7 +87,7 @@
     {
       kind: 'menu', label: 'Articulation',
       paths: ['timbre.articulation'], options: ['articulations'], fallback: 'none',
-      caption: 'Chirp glides every one-shot down an octave into its note: the synthetic identity',
+      caption: 'Chirp glides each one-shot down an octave into its note',
       group: 'Timbre'
     },
     { kind: 'fader', label: 'Brightness', path: 'timbre.brightness', min: 800, max: 6000, step: 50, format: 'int', group: 'Timbre' },

@@ -2,18 +2,31 @@
 
 Interaction sound as a system, not a pile of clicks.
 
-Anti is a tiny, dependency-free Web Audio engine that gives an interface a coherent voice. It renders a fixed event grammar (grab, tick, undo, commit, reject, release, a progress tier for loading, the notifications success / info / warning / error, and a deterministic signature) live from a single theme object. Nothing is fetched and nothing is sampled: every sound is synthesized on the spot, so the same meaning always reads the same while the exact waveform never repeats, and one JSON retunes your entire product.
+Anti is a tiny, dependency-free Web Audio engine that gives an interface a coherent voice. It renders a fixed event grammar (grab, tick, undo, commit, reject, release, a progress tier for loading, the notifications success / info / warning / error, and a deterministic signature) from one theme object. Every sound is synthesized live: nothing is fetched or sampled. The same meaning always reads the same, the exact waveform never repeats, and one JSON retunes the whole product.
 
-Built on a decade of Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)) interaction sound practice.
+Built on a decade of interaction sound practice at Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)).
+
+## Install
+
+The engine is one file with no dependencies. Copy [`engine/anti.js`](engine/anti.js) into your project and load it:
+
+```html
+<script src="anti.js"></script>
+<script>
+  Anti.bind();
+</script>
+```
+
+With a bundler, install from this repository. The package builds itself on install (ESM, CommonJS and types):
 
 ```sh
-npm i anti-tapes
+npm i github:Dyya/anti-tapes
 ```
 
 ## Quick start
 
 ```js
-import Anti from 'anti-tapes';
+import Anti from 'anti-tapes';   // with a script tag, Anti is already a global
 
 Anti.bind();                 // every [data-anti] element, wired
 Anti.play('commit');         // a resolving triad, built from the theme's scale
@@ -25,25 +38,16 @@ Anti.setTheme({ key: { root: 'D' }, timbre: { brightness: 1800 } });
 <button data-anti="reject">Cancel</button>
 ```
 
-That is the whole integration. The AudioContext is created and resumed on the first user gesture, and before that every call quietly does nothing, so importing this on a server or calling it during a render is safe and silent.
-
-No build step required either. The package ships a global build for a script tag:
-
-```html
-<script src="https://unpkg.com/anti-tapes"></script>
-<script>
-  Anti.bind();
-</script>
-```
+That is the whole integration. The AudioContext starts on the first user gesture. Before that every call is a silent no-op, so importing on a server or calling during a render is safe.
 
 ## The grammar
 
-Eleven events form the grammar. Their meaning is fixed; the theme determines how they sound.
+Eleven events. The meaning is fixed; the theme sets the sound.
 
 | Event | What it says |
 |---|---|
 | `grab` | contact: a short soft pluck at the value's pitch |
-| `tick` | the positional micro event: focus moves, detents, insertion points. Felt more than heard, and the most-fired sound in a real interface |
+| `tick` | position: focus moves, detents, insertion points. Felt more than heard; the most-fired sound in an interface |
 | `undo` | the take-back: tick played backwards, so a deletion reads as the insertion reversed |
 | `commit` | it resolved: a staggered triad from the theme's scale, so minor themes commit minor |
 | `reject` | it did not: a beating minor second, quiet and brief |
@@ -51,9 +55,9 @@ Eleven events form the grammar. Their meaning is fixed; the theme determines how
 | `success` `info` `warning` `error` | the notification tier. Success ascends and resolves, info is a calm ping, warning ends unresolved, error lands in a beating cluster |
 | `signature` | the brand moment: a two-second motif generated deterministically from the theme and its seed. Launch or sign-in, never ambient |
 
-Which event belongs to a moment, how much weight it carries, and when to stay silent are recorded in [docs/grammar.md](docs/grammar.md): why a tooltip is silent, why a modal opens lower on the ladder than a popover, why a drag ends with `drone.stop` alone, and why a keyboard has no travel.
+[docs/grammar.md](docs/grammar.md) records which event each interaction gets, how much weight it carries, and when to stay silent (a tooltip is silent; a modal opens lower on the ladder than a popover).
 
-Continuous change is a held drone rather than an event, because a drag is one gesture and should be one sound. You name the run, so any number of them can be in the air at once:
+Continuous change is a held drone, not an event: one gesture, one sound. Each drone is named, so several can run at once:
 
 ```js
 Anti.drone.start('volume', 0.5);      // the onset IS the grab, no pluck on top
@@ -61,7 +65,7 @@ Anti.drone.move('volume', 0.8, 0.9);  // glides. Third arg is intensity
 Anti.drone.stop('volume');            // the decay IS the release
 ```
 
-Loading is a run that resolves exactly when it lands:
+Loading is a run that resolves when it lands:
 
 ```js
 Anti.progress.start('upload', 0);
@@ -71,7 +75,7 @@ Anti.progress.hold('upload');   // indeterminate: no reference tone, because a
 Anti.progress.done('upload');   // resolves. stop() abandons without resolving
 ```
 
-`Anti.silence()` stops every held drone and progress run at once, which is what a view being left mid-gesture needs.
+`Anti.silence()` stops every held drone and progress run at once, for a view left mid-gesture.
 
 ## Theming
 
@@ -89,7 +93,7 @@ Anti.setTheme({
 });
 ```
 
-Ten materials (glass, wood, rubber, metal, ceramic, plastic, felt, membrane, stone, paper) are modal resonator banks layered under the contact events. Eight scales, including the modes and whole-tone. Any timbre slot may be `noise`, which voices as bandpassed white noise centered on the note, so pitch still carries the value.
+Ten materials (glass, wood, rubber, metal, ceramic, plastic, felt, membrane, stone, paper): modal resonator banks under the contact events. Eight scales, including the modes and whole-tone. Any timbre slot may be `noise`: bandpassed white noise centered on the note, so pitch still carries the value.
 
 Presets ship with the package:
 
@@ -98,20 +102,20 @@ import tape from 'anti-tapes/themes/tape.theme.json' with { type: 'json' };
 Anti.setTheme(tape, { replace: true });
 ```
 
-(The import attribute is what Node and current browsers require for a JSON module; a bundler that inlines JSON does not mind it.)
+Node and current browsers require the import attribute for a JSON module; a bundler that inlines JSON accepts it.
 
-The format is documented in [docs/theme.md](docs/theme.md), and described as data in `anti-tapes/schema`: one row per tunable modifier field with its kind, range and options, so an editor can be generated from the format rather than hand-written against it. The signature seed and the per-event overrides are documented in the theme format but carry no schema row.
+The format is documented in [docs/theme.md](docs/theme.md). `anti-tapes/schema` describes it as data (one row per tunable modifier field, with kind, range and options), so an editor can be generated from it. The signature seed and per-event overrides have no schema row.
 
-A theme is a text file, and one written by hand plays exactly like one made in a tool. The grammar is a specification and this engine is its reference implementation, MIT licensed so other tools and runtimes can implement the format too.
+A theme written by hand plays exactly like one made in a tool. The grammar is a specification; this engine is its reference implementation, MIT licensed so other tools and runtimes can implement the format.
 
-## Etiquette, which is why this can be left on
+## Etiquette
 
-The reason products ship silent is that sound is usually rude. This engine enforces manners rather than trusting them:
+The engine enforces manners rather than trusting them:
 
-- **Silence is the default state.** Sound only speaks when the user acts.
+- **Silence is the default.** Sound speaks only when the user acts.
 - **A real off switch.** `Anti.setEnabled(false)` and `Anti.setVolume(0.5)`, both persisted. The listener's setting is never the theme's.
-- **Nothing spikes.** Every voice is enveloped, the bus ends in a compressor and a hard-clip ceiling, and voices are capped at 16 and self-cleaning.
-- **Repetition thins itself.** Fast repeats of the same event get quieter and recover over about a second of quiet, so a held key does not become a jackhammer.
+- **Nothing spikes.** Every voice is enveloped, voices are capped at 16 and self-cleaning, and the bus ends in a compressor and a hard-clip ceiling.
+- **Repetition thins itself.** Fast repeats of the same event get quieter and recover over about a second of quiet.
 
 ## API
 
@@ -125,11 +129,11 @@ Anti.silence()                      Anti.resume() / Anti.ready
                                     Anti.events / materials / scales / version
 ```
 
-`Anti.render` runs an event through an OfflineAudioContext, which is how sound packs are rendered offline. `Anti.resume()` is the explicit arm for a host that wants to start the context on its own gesture rather than the engine's listeners, and `Anti.ready` says whether a call will sound right now. TypeScript declarations are included.
+`Anti.render` renders an event through an OfflineAudioContext, for sound packs. `Anti.resume()` starts the context from the host's own gesture instead of the engine's listeners. `Anti.ready` says whether a call will sound right now. TypeScript declarations are included.
 
 ## Examples
 
-Four pages, each mapping one interaction family onto the grammar and saying which calls were judgment rather than mechanics.
+Four pages, each mapping one interaction family onto the grammar.
 
 | Page | What it works out |
 |---|---|
@@ -138,7 +142,7 @@ Four pages, each mapping one interaction family onto the grammar and saying whic
 | `examples/form.html` | Focus as position, validation as a verdict that waits for blur, a save as a run, and the four places that stay silent |
 | `examples/react.html` | Two hooks and the bug they prevent: a component that unmounts mid-drag, and a view change that would leave a voice held |
 
-They import the package over a bare specifier the way an app does, so they need a server rather than a file path:
+They import the package by its bare name, as an app does, so they need a server:
 
 ```sh
 ./serve.sh      # builds the package, serves the repo
@@ -148,9 +152,9 @@ then open `/examples/`.
 
 ## Anti Studio
 
-Designing a sound identity by typing numbers into JSON is a poor way to use your ears. [Anti Studio](https://anti.fyi) is the instrument: a rack of real controls across six interaction scenarios plus a density stress section, all on one theme, tuned by direct manipulation and by ear, then exported as theme JSON, an integration snippet, or a rendered sound pack.
+[Anti Studio](https://anti.fyi) is the instrument for designing a theme by ear: real controls across six interaction scenarios plus a density stress section, all on one theme, exported as theme JSON, an integration snippet, or a rendered sound pack.
 
-The studio is free to play and is not part of this repository. This engine is, and always will be, free and unrestricted.
+The studio is free to play and is not part of this repository. The engine is free and unrestricted, and always will be.
 
 ## License
 

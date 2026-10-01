@@ -47,9 +47,9 @@
   <section class="lead-block">
     <span class="at-index">example / plain DOM</span>
     <h1 class="at-hero">No framework, no build, no assets.</h1>
-    <p class="at-lead">Five blocks, and between them they use the whole grammar. Every sound below is synthesized on the spot from one theme object: nothing is fetched, and no two presses render the same waveform.</p>
+    <p class="at-lead">Five blocks cover the whole grammar. Every sound is synthesized live from one theme object: nothing is fetched, and no two presses render the same waveform.</p>
     <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
-      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+      <p class="at-body">The built package was not found. Run <code>npm run build</code> (or <code>./serve.sh</code>, which builds too) and reload.</p>
     </div>
   </section>
 
@@ -58,7 +58,7 @@
   <section class="demo">
     <span class="at-index">01</span>
     <h2 class="at-display">Bind it and forget it</h2>
-    <p class="at-body">One call wires every element carrying a <code>data-anti</code> attribute. For a button whose meaning is already in the markup, this is the entire integration: no handlers, no imports at the call site.</p>
+    <p class="at-body">One call wires every element with a <code>data-anti</code> attribute. For a button whose meaning is in the markup, that is the whole integration: no handlers, no imports at the call site.</p>
 
     <div class="split">
       <div class="stage">
@@ -68,7 +68,7 @@
           <button class="at-btn at-btn--tag" data-anti="tick">Next</button>
           <button class="at-btn" disabled>Unavailable</button>
         </div>
-        <p class="at-caption">The disabled button is silent on purpose: nothing happened, so nothing is said. A control that refuses out loud is a different case, and it is a <em>locked</em> one.</p>
+        <p class="at-caption">The disabled button is silent: nothing happened. A control that refuses out loud is a different case, a <em>locked</em> one.</p>
       </div>
       <pre class="code">import Anti from 'anti-tapes'
 
@@ -85,7 +85,7 @@ Anti.bind()   <span class="cmt">// every [data-anti], wired</span>
   <section class="demo">
     <span class="at-index">02</span>
     <h2 class="at-display">A mechanism gets a pair</h2>
-    <p class="at-body">A switch is discrete: it is taken hold of and it lands. That is the one-shot pair, grab on the press and a verdict on the landing, and it is the shape a keyboard key, a checkbox, and a segmented control all take.</p>
+    <p class="at-body">A switch is discrete, so it gets the one-shot pair: grab on the press, a verdict on the landing. Keys, checkboxes, and segmented controls take the same shape.</p>
 
     <div class="split">
       <div class="stage">
@@ -112,7 +112,7 @@ sw.addEventListener('click', () =&gt; {
   <section class="demo">
     <span class="at-index">03</span>
     <h2 class="at-display">A drag is one gesture, so it is one sound</h2>
-    <p class="at-body">Continuous change is a held drone that glides with the value. The onset <em>is</em> the grab and the decay <em>is</em> the release, so a drag starts with <code>drone.start</code> alone and ends with <code>drone.stop</code> alone. Layering a pluck at either end is the most common way to get this wrong: two sounds read as two events.</p>
+    <p class="at-body">Continuous change is a held drone that glides with the value. Its onset <em>is</em> the grab and its decay <em>is</em> the release: a drag starts with <code>drone.start</code> alone and ends with <code>drone.stop</code> alone. A pluck layered at either end reads as a second event.</p>
 
     <div class="split">
       <div class="stage">
@@ -123,7 +123,7 @@ sw.addEventListener('click', () =&gt; {
           </div>
           <input type="range" id="lvl" min="0" max="1" step="0.001" value="0.5" aria-label="Level">
         </div>
-        <p class="at-caption">Drag it, then tab to it and use the arrow keys. A keyboard user is not dragging: they are stepping, so each notch gets its own pluck instead of a held voice. The gesture decides the sound, not the widget.</p>
+        <p class="at-caption">Drag it, then tab to it and use the arrow keys. A keyboard steps rather than drags, so each notch plucks instead of holding a voice.</p>
       </div>
       <pre class="code">lvl.addEventListener('pointerdown', () =&gt; {
   dragging = true
@@ -157,7 +157,7 @@ window.addEventListener('pointercancel', end)</pre>
   <section class="demo">
     <span class="at-index">04</span>
     <h2 class="at-display">Loading that resolves when it lands</h2>
-    <p class="at-body">A progress run is a voice-led figure that arrives exactly at 100%: the lead climbs the ladder, a bass walks the quarters, and a reference tone beats slower as it closes. <code>done</code> resolves it. <code>stop</code> abandons it without resolution, which is what a cancel actually sounds like.</p>
+    <p class="at-body">A progress run arrives exactly at 100%: the lead climbs the ladder, a bass walks the quarters, and a reference tone beats slower as it closes. <code>done</code> resolves it; <code>stop</code> abandons it, the sound of a cancel.</p>
 
     <div class="split">
       <div class="stage">
@@ -169,7 +169,7 @@ window.addEventListener('pointercancel', end)</pre>
         <div class="at-readout" style="min-width: 220px">
           <div class="at-leaders"><span>State</span><span class="at-leaders-fill"></span><b id="upstate">idle</b></div>
         </div>
-        <p class="at-caption">Indeterminate is a real state and it sounds like one: <code>hold</code> rocks between two rungs with no reference tone, because a reference is a promise of resolution and this state makes none.</p>
+        <p class="at-caption">Indeterminate: <code>hold</code> rocks between two rungs with no reference tone, since this state promises no resolution.</p>
       </div>
       <pre class="code">Anti.progress.start('upload', 0)
 
@@ -189,7 +189,7 @@ Anti.progress.stop('upload')   <span class="cmt">// abandons</span></pre>
   <section class="demo">
     <span class="at-index">05</span>
     <h2 class="at-display">The tier that speaks without being asked</h2>
-    <p class="at-body">Four notifications, and their shapes are their meanings. Success ascends and resolves. Info is a calm consonant ping. Warning oscillates and ends unresolved, with a faint beat left in the air. Error falls and lands in a beating cluster, which is the one place a charged waveform earns its keep.</p>
+    <p class="at-body">Each notification's shape is its meaning. Success ascends and resolves. Info is a calm consonant ping. Warning oscillates and ends unresolved, on a faint beat. Error falls into a beating cluster, the one place for a charged waveform.</p>
 
     <div class="split">
       <div class="stage">
@@ -199,7 +199,7 @@ Anti.progress.stop('upload')   <span class="cmt">// abandons</span></pre>
           <button class="at-btn" data-note="warning">Warning</button>
           <button class="at-btn" data-note="error">Error</button>
         </div>
-        <p class="at-caption">Fire them in a row. The repetition governor thins fast repeats of the same event and lets them recover over about a second of quiet, so a retry loop cannot turn into a jackhammer.</p>
+        <p class="at-caption">Fire them in a row. The repetition governor thins fast repeats of one event, recovering over about a second of quiet.</p>
       </div>
       <pre class="code">Anti.play('success')
 Anti.play('info')

@@ -58,7 +58,8 @@
   ],
   "scripts": {
     "build": "node tools/build-package.js",
-    "prepublishOnly": "node tools/build-package.js"
+    "prepublishOnly": "node tools/build-package.js",
+    "prepare": "node tools/build-package.js"
   },
   "repository": {
     "type": "git",

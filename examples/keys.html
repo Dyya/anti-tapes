@@ -84,16 +84,16 @@
   <section class="lead-block">
     <span class="at-index">example / keys</span>
     <h1 class="at-hero">Typing, and taking it back.</h1>
-    <p class="at-lead">The oldest experiment in this project and still the one that proves the point. Every character speaks at its own pitch, and backspace is the only sound in the grammar that runs backwards.</p>
+    <p class="at-lead">Every character speaks at its own pitch. Backspace is the only sound in the grammar that runs backwards.</p>
     <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
-      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+      <p class="at-body">The built package was not found. Run <code>npm run build</code> (or <code>./serve.sh</code>, which builds too) and reload.</p>
     </div>
   </section>
 
   <section class="demo">
     <span class="at-index">01</span>
     <h2 class="at-display">Type into it</h2>
-    <p class="at-body">Then hold backspace and listen to the difference. Enter commits, escape rejects and clears.</p>
+    <p class="at-body">Then hold backspace and hear the difference. Enter commits; escape rejects and clears.</p>
 
     <div class="split">
       <div class="stage">
@@ -132,8 +132,8 @@ Anti.play('undo', { value: pitch(removed) })</pre>
   <section class="demo">
     <span class="at-index">02</span>
     <h2 class="at-display">Why undo is its own event</h2>
-    <p class="at-body">Ten of the eleven events are forward gestures: they attack, then decay. Undo is the one that is built the other way round. The voice swells in slowly, bends down an octave with both endpoints quantized to the ladder, and then seats fast, so a deletion reads as an insertion played in reverse.</p>
-    <p class="at-body">This was the last event added to the grammar, in v0.8, and it was added because no forward sound could say "taken back". Every other interaction family that got mapped onto this engine (buttons, layers, forms, motion, voice) turned out to need judgment about which existing pair applied, and no new events at all. Typing needed one.</p>
+    <p class="at-body">Ten of the eleven events attack, then decay. Undo runs the other way: it swells in slowly, bends down an octave (both endpoints on the ladder), and seats fast, so a deletion reads as an insertion in reverse.</p>
+    <p class="at-body">No forward sound can say "taken back". Buttons, layers, forms, motion, and voice all map onto existing events; typing needed a new one.</p>
 
     <div class="split">
       <div class="stage">
@@ -142,7 +142,7 @@ Anti.play('undo', { value: pitch(removed) })</pre>
           <button class="at-btn" id="hear-undo">Hear undo</button>
           <button class="at-btn at-btn--tag" id="hear-burst">A word, then take it back</button>
         </div>
-        <p class="at-caption">The same rung, forwards and backwards. They are the same length and roughly the same loudness: what differs is which end the energy is at.</p>
+        <p class="at-caption">The same rung, forwards and backwards: same length, similar loudness, the energy at opposite ends.</p>
       </div>
       <pre class="code"><span class="cmt">// tick:  attack, then decay.
 // undo:  swell, bend down an octave, seat.

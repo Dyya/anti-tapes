@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Anti examples - A form</title>
-<meta name="description" content="One form surface: focus as position, validation as a verdict, a save as a progress run, and the parts that stay deliberately silent.">
+<meta name="description" content="One form: focus as position, validation as a verdict, a save as a progress run, and the deliberate silences.">
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='2.4' r='2.4'/%3E%3Crect x='7.2' y='10.5' width='9.6' height='3'/%3E%3Ccircle cx='2.4' cy='21.6' r='2.4'/%3E%3Ccircle cx='21.6' cy='21.6' r='2.4'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="gallery.css">
@@ -74,16 +74,16 @@
   <section class="lead-block">
     <span class="at-index">example / a form</span>
     <h1 class="at-hero">The surface everyone ships, with a voice.</h1>
-    <p class="at-lead">A form is where sound is most often done badly, because the temptation is to score every keystroke. Nearly all of it is judgment about which existing pair applies, and the hardest calls are the ones that end in silence.</p>
+    <p class="at-lead">Focus, validation, suggestions and a save, on the grammar.</p>
     <div class="at-card at-card--panel nobuild" id="nobuild" hidden>
-      <p class="at-body">This page imports the built package and could not find it. Run <code>npm run build</code> (or <code>./serve.sh</code>, which does it for you) and reload.</p>
+      <p class="at-body">The built package was not found. Run <code>npm run build</code> (or <code>./serve.sh</code>, which builds too) and reload.</p>
     </div>
   </section>
 
   <section class="demo">
     <span class="at-index">01</span>
     <h2 class="at-display">Fill it in</h2>
-    <p class="at-body">Tab between the fields, get the email wrong on purpose, take a suggestion with the arrow keys, then save. Six decisions are in here and four of them are about restraint.</p>
+    <p class="at-body">Tab between the fields, get the email wrong, take a suggestion with the arrow keys, then save. Four of the six decisions here are restraint.</p>
 
     <div class="split">
       <div class="stage">
@@ -154,7 +154,7 @@ toast('success', 'Saved')</pre>
   <section class="demo">
     <span class="at-index">02</span>
     <h2 class="at-display">The four that stay quiet</h2>
-    <p class="at-body">Restraint is most of the work, and it is the part a demo cannot show by playing something. Each of these was a deliberate call.</p>
+    <p class="at-body">Each of these is silent by choice.</p>
 
     <div class="split">
       <div class="stage">
@@ -164,19 +164,13 @@ toast('success', 'Saved')</pre>
           <div class="at-leaders"><span>Hovering the help chip</span><span class="at-leaders-fill"></span><b>silent</b></div>
           <div class="at-leaders"><span>The disabled save</span><span class="at-leaders-fill"></span><b>silent</b></div>
         </div>
-        <p class="at-caption">Hover the help chip and listen: nothing. The user did not act, they rested, and resting is not an event.</p>
+        <p class="at-caption">Hover the help chip: nothing. Resting is not an action.</p>
       </div>
-      <pre class="code"><span class="cmt">// A tooltip is the clearest case in the grammar.
-// Every other layer (popover, modal, confirm) is
-// opened BY somebody. A tooltip appears because a
-// pointer stopped moving, which is not a decision,
-// and scoring it makes the interface twitch at
-// people who are reading.
+      <pre class="code"><span class="cmt">// A tooltip is silent: a pointer that stopped
+// moving has not acted.
 
-// The disabled control is the same argument from
-// the other end: nothing happened. A control that
-// refuses OUT LOUD is a different state, a locked
-// one, and it earns its reject because a refusal
+// A disabled control is silent: nothing happened.
+// A locked one refuses out loud, because a refusal
 // is an answer.</span></pre>
     </div>
   </section>
