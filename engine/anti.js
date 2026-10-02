@@ -1,5 +1,5 @@
 /*
-  Anti v0.9.5 - a themeable interaction sound engine.
+  Anti v0.9.6 - a themeable interaction sound engine.
   Synthesis only, no assets. One theme object retunes the whole grammar.
   Grammar: grab / tick / undo / commit / reject / release, drones (continuous change),
   notifications (success / info / warning / error).
@@ -80,6 +80,13 @@
   ledger, so an app-supplied id of '__proto__' is an ordinary key instead of
   a prototype write plus a voice nothing releases, and setVolume refuses a
   non-finite value instead of persisting NaN and throwing on a live bus.
+  v0.9.6 fixes the bus falling behind the theme. setTheme wrote the theme's
+  brightness and master gain to the bus only while the engine was sounding,
+  so a theme changed with the listener's switch off (or with the context
+  suspended) reached every voice and not the bus: after unmuting, the new
+  theme played through the old brightness and the old level until the next
+  edit, and an audition disagreed with a pack rendered from the same theme.
+  The bus now follows the theme whenever there is a bus.
 */
 // One file, three ways in. As a <script> tag it hangs the API on window.Anti,
 // which is how every surface in this repo loads it, from file://, with no
@@ -97,7 +104,7 @@
 /* @anti:body */
   'use strict';
 
-  var VERSION = '0.9.5';
+  var VERSION = '0.9.6';
   var VOICE_CAP = 16;
   var MIN_GAIN = 0.0001;
 
@@ -1225,7 +1232,13 @@
     }
     sanitizeTheme();
     ladderCache = null;
-    if (running()) {
+    // Whenever there is a bus, not only while the engine is sounding. Gated
+    // on running(), a theme set with the listener's switch off never reached
+    // the bus, and nothing caught it up when the switch came back on: the
+    // voices read the new theme and the bus kept the old brightness and
+    // master. A parameter set on a suspended context lands when it resumes,
+    // so there is nothing to wait for.
+    if (actx && bus) {
       var t = actx.currentTime;
       bus.filter.frequency.setTargetAtTime(theme.timbre.brightness, t, 0.05);
       bus.master.gain.setTargetAtTime(theme.gain.master, t, 0.05);
