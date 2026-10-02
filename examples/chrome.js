@@ -57,14 +57,23 @@ const SPRITE = `
   that is not open yet; it is drawn and refuses, as it does on the home page.
 */
 const SITE = 'https://anti.fyi';
+// Three groups, as on the home page: where the work is and how to reach it,
+// the documents, and who made it. One row on a wide screen, a line each on a
+// phone.
 const FOOTER = [
-  ['GitHub', 'https://github.com/Dyya/anti-tapes'],
-  ['Register', ''],
-  ['Contact', 'mailto:hello@anti.fyi'],
-  ['Privacy', SITE + '/privacy'],
-  ['Terms', SITE + '/terms'],
-  ['Changelog', SITE + '/changelog'],
-  ['Made by AD&', 'https://adidot.com/']
+  [
+    ['GitHub', 'https://github.com/Dyya/anti-tapes'],
+    ['Register', ''],
+    ['Contact', 'mailto:hello@anti.fyi']
+  ],
+  [
+    ['Privacy', SITE + '/privacy'],
+    ['Terms', SITE + '/terms'],
+    ['Changelog', SITE + '/changelog']
+  ],
+  [
+    ['Made by AD&', 'https://adidot.com/']
+  ]
 ];
 
 function mountFooter() {
@@ -73,12 +82,17 @@ function mountFooter() {
   const nav = document.createElement('nav');
   nav.className = 'links';
   nav.setAttribute('aria-label', 'Anti Tapes');
-  for (const [label, href] of FOOTER) {
-    const a = document.createElement('a');
-    a.textContent = label;
-    if (href) a.href = href;
-    else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '0'); }
-    nav.appendChild(a);
+  for (const group of FOOTER) {
+    const line = document.createElement('span');
+    line.className = 'links-row';
+    for (const [label, href] of group) {
+      const a = document.createElement('a');
+      a.textContent = label;
+      if (href) a.href = href;
+      else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '0'); }
+      line.appendChild(a);
+    }
+    nav.appendChild(line);
   }
   // The mark the home page keeps in its bottom right corner, at the other
   // end of the same line.
