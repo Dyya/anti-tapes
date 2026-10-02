@@ -307,17 +307,6 @@ a { color: inherit; }
 .at-brand a { display: inline-flex; align-items: center; color: inherit; text-decoration: none; }
 .at-brand .at-icon { width: 20px; height: 20px; }
 
-/* The pill that holds a cluster. */
-.at-group {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--at-s3);
-  padding: var(--at-s2) var(--at-s3);
-  border: var(--at-line) solid var(--at-hairline-2);
-  border-radius: var(--at-r);
-}
-.at-group--accent { border-color: var(--at-accent-ink); color: var(--at-accent-ink); }
-
 .at-chip {
   display: inline-flex;
   align-items: center;
@@ -461,7 +450,12 @@ footer.foot { margin-top: clamp(var(--at-s9), 11vw, var(--at-s10)); }
    the whole site, written once in chrome.js. It rests on the gutter, the way
    it does there. */
 .links { display: flex; flex-wrap: wrap; gap: var(--at-s5); }
-footer.foot > * + .links { margin-top: var(--at-s7); }
+footer.foot > * + .foot-row { margin-top: var(--at-s7); }
+/* The row and, opposite it, the mark the home page holds in its bottom right
+   corner. One line, both ends on the gutter. On a phone the corner mark
+   leaves, as it does there. */
+.foot-row { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--at-s5); }
+.copy { font-size: var(--at-fs-label); letter-spacing: var(--at-track); text-transform: uppercase; white-space: nowrap; }
 .links a {
   font-size: var(--at-fs-label);
   letter-spacing: var(--at-track);
@@ -476,7 +470,16 @@ footer.foot > * + .links { margin-top: var(--at-s7); }
 /* The toast rail, on the gutter like every other fixed rail. */
 .toastrail { position: fixed; right: var(--at-gutter); bottom: var(--at-gutter); z-index: 40; }
 
-.hint { transition: opacity var(--at-t3) var(--at-settle); }
+/* The arm line, and it is the site's: the same sentence, set the same way, on
+   the home page, in the studio and here. It was a red pill with a glyph here
+   and a filled one in the studio, three renderings of one instruction. */
+.hint {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity var(--at-t3) var(--at-settle);
+}
 .hint.gone { opacity: 0; pointer-events: none; }
 
 /* Compact. The arm hint is the first thing cut: the bar cannot hold a sentence
@@ -489,6 +492,7 @@ footer.foot > * + .links { margin-top: var(--at-s7); }
   .hint { display: none; }
 }
 @media (max-width: 719px) {
+  .copy { display: none; }
   header.bar { flex-wrap: wrap; }
   .toastrail { left: var(--at-gutter); }
   .at-toaststack { width: auto; }

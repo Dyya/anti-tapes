@@ -80,7 +80,38 @@ function mountFooter() {
     else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '0'); }
     nav.appendChild(a);
   }
-  foot.appendChild(nav);
+  // The mark the home page keeps in its bottom right corner, at the other
+  // end of the same line.
+  const copy = document.createElement('span');
+  copy.className = 'copy';
+  copy.textContent = 'A\\T\u00A92016-26';
+  const row = document.createElement('div');
+  row.className = 'foot-row';
+  row.appendChild(nav);
+  row.appendChild(copy);
+  foot.appendChild(row);
+}
+
+/*
+  A reader who has already clicked on another page of this site, in this tab,
+  is not asked to click again where the browser lets sound start: a
+  same-site navigation carries the click with it (Chromium does), and the
+  page can see that at load. Where it does not (Safari, Firefox, a first
+  visit, a pasted address) nothing is created, and the first gesture arms
+  the engine as before. The probe is the point: calling Anti.resume() on a
+  context the browser will not start would leave the engine waiting on a
+  promise that never settles, reporting ready while every sound queues.
+*/
+function carriedOver() {
+  const ua = navigator.userActivation;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!ua || !ua.hasBeenActive || !AC) return false;
+  try {
+    const probe = new AC();
+    const ok = probe.state === 'running';
+    probe.close();
+    return ok;
+  } catch (e) { return false; }
 }
 
 function mountSprite() {
@@ -135,14 +166,19 @@ export function mountChrome() {
   // outlasts the thing it hints at is just furniture.
   const hint = el('hint');
   if (hint) {
+    // Armed on another page of the site: arm here too, and ask nothing.
+    if (Anti.enabled && carriedOver()) Anti.resume();
+    // The line stands only while a click would do what it says: sound is on
+    // and the engine is not yet live.
     const arm = () => {
-      if (!Anti.ready) return;
+      if (Anti.enabled && !Anti.ready) return;
       hint.classList.add('gone');
       window.removeEventListener('pointerdown', arm, true);
       window.removeEventListener('keydown', arm, true);
     };
     window.addEventListener('pointerdown', arm, true);
     window.addEventListener('keydown', arm, true);
+    arm();
   }
 
   // The page loaded and its module graph resolved, which is what the build
