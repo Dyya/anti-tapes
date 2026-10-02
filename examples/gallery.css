@@ -450,9 +450,8 @@ footer.foot { margin-top: clamp(var(--at-s9), 11vw, var(--at-s10)); }
    the whole site, written once in chrome.js. It rests on the gutter, the way
    it does there. */
 .links { display: flex; flex-wrap: wrap; gap: var(--at-s5); }
-/* A group dissolves into the row on a wide screen and is a line of its own
-   on a phone, where seven links left to wrap break wherever the width runs
-   out and stand a full gap apart. */
+/* A group dissolves into the row on a wide screen. On a phone the row is a
+   grid and the groups decide where its lines break (the compact block). */
 .links-row { display: contents; }
 footer.foot > * + .foot-row { margin-top: var(--at-s7); }
 /* The row and, opposite it, the mark the home page holds in its bottom right
@@ -497,11 +496,14 @@ footer.foot > * + .foot-row { margin-top: var(--at-s7); }
 }
 @media (max-width: 719px) {
   .copy { display: none; }
-  /* Three short lines, close together. The room a link needs under a thumb is
-     padding inside the link, not a gap between the lines. */
-  .links { flex-direction: column; flex-wrap: nowrap; gap: 0; margin-bottom: -5px; }
-  .links-row { display: flex; gap: var(--at-s5); }
-  .links a { padding: 5px 0; }
+  /* Two lines on four equal columns, as on the home page: where the work is
+     and how to reach it, then the documents, with the credit closing the
+     second line. Equal columns stand the links under one another. The room a
+     link needs under a thumb is padding inside the link, not a gap between
+     the lines. */
+  .links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-bottom: -5px; }
+  .links-row:nth-child(2) > a:first-child { grid-column-start: 1; }
+  .links a { padding: 5px 0; white-space: nowrap; }
   header.bar { flex-wrap: wrap; }
   .toastrail { left: var(--at-gutter); }
   .at-toaststack { width: auto; }

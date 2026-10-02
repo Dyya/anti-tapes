@@ -58,8 +58,8 @@ const SPRITE = `
 */
 const SITE = 'https://anti.fyi';
 // Three groups, as on the home page: where the work is and how to reach it,
-// the documents, and who made it. One row on a wide screen, a line each on a
-// phone.
+// the documents, and who made it. One row on a wide screen; on a phone two
+// lines on four equal columns, the credit closing the second.
 const FOOTER = [
   [
     ['GitHub', 'https://github.com/Dyya/anti-tapes'],
