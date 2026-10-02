@@ -1,6 +1,6 @@
 /*
   Page furniture for the examples: the bar's two listener choices (sound on or
-  off, day or night) and a toast stack. None of it is the lesson. It lives here
+  off, day or night), the footer, and a toast stack. None of it is the lesson. It lives here
   so each example file is only the interaction it is about, and so the off
   switch is on every page of this gallery without being retyped four times.
 
@@ -49,6 +49,40 @@ const SPRITE = `
   <g ${STROKE}><path d="M23 12V1H1V23H23V12ZM1 23L12 12H23"/></g>
 </symbol>`;
 
+/*
+  The footer, which is the home page's: the same destinations in the same
+  order, so a reader who came here from the site can leave the same way. It is
+  built here and not written into five pages, because a row of links copied
+  five times is five rows to keep true. An entry with no address is a place
+  that is not open yet; it is drawn and refuses, as it does on the home page.
+*/
+const SITE = 'https://anti.fyi';
+const FOOTER = [
+  ['GitHub', 'https://github.com/Dyya/anti-tapes'],
+  ['Register', ''],
+  ['Contact', 'mailto:hello@anti.fyi'],
+  ['Privacy', SITE + '/privacy'],
+  ['Terms', SITE + '/terms'],
+  ['Changelog', SITE + '/changelog'],
+  ['Made by AD&', 'https://adidot.com/']
+];
+
+function mountFooter() {
+  const foot = document.querySelector('footer.foot');
+  if (!foot || foot.querySelector('.links')) return;
+  const nav = document.createElement('nav');
+  nav.className = 'links';
+  nav.setAttribute('aria-label', 'Anti Tapes');
+  for (const [label, href] of FOOTER) {
+    const a = document.createElement('a');
+    a.textContent = label;
+    if (href) a.href = href;
+    else { a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '0'); }
+    nav.appendChild(a);
+  }
+  foot.appendChild(nav);
+}
+
 function mountSprite() {
   if (document.getElementById('at-sprite')) return;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -64,6 +98,7 @@ function mountSprite() {
 /** Wire the bar. Call once, after the DOM is parsed. */
 export function mountChrome() {
   mountSprite();
+  mountFooter();
   const flip = el('soundflip');
   const ico = el('soundflip-ico');
   if (flip && ico) {
