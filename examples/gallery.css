@@ -78,7 +78,7 @@
 body[data-at-theme='night'] {
   --at-paper: #0A0B0C;
   --at-surface: #151515;
-  --at-panel: #060708;
+  --at-panel: #1C1D1E;
   --at-ink: #F0F0F0;
   --at-ink-2: rgba(240, 240, 240, 0.68);
   --at-ink-3: rgba(240, 240, 240, 0.44);
@@ -450,9 +450,6 @@ footer.foot { margin-top: clamp(var(--at-s9), 11vw, var(--at-s10)); }
    the whole site, written once in chrome.js. It rests on the gutter, the way
    it does there. */
 .links { display: flex; flex-wrap: wrap; gap: var(--at-s5); }
-/* A group dissolves into the row on a wide screen. On a phone the row is a
-   grid and the groups decide where its lines break (the compact block). */
-.links-row { display: contents; }
 footer.foot > * + .foot-row { margin-top: var(--at-s7); }
 /* The row and, opposite it, the mark the home page holds in its bottom right
    corner. One line, both ends on the gutter. On a phone the corner mark
@@ -496,13 +493,12 @@ footer.foot > * + .foot-row { margin-top: var(--at-s7); }
 }
 @media (max-width: 719px) {
   .copy { display: none; }
-  /* Two lines on four equal columns, as on the home page: where the work is
-     and how to reach it, then the documents, with the credit closing the
-     second line. Equal columns stand the links under one another. The room a
-     link needs under a thumb is padding inside the link, not a gap between
-     the lines. */
-  .links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-bottom: -5px; }
-  .links-row:nth-child(2) > a:first-child { grid-column-start: 1; }
+  /* One line on a phone, as on the home page: the links marked wide leave
+     and the four that stay are spread evenly from gutter to gutter. The room
+     a link needs under a thumb is padding inside the link. */
+  .foot-row { display: block; }
+  .links { flex-wrap: nowrap; justify-content: space-between; gap: var(--at-s3); margin-bottom: -5px; }
+  .links .wide { display: none; }
   .links a { padding: 5px 0; white-space: nowrap; }
   header.bar { flex-wrap: wrap; }
   .toastrail { left: var(--at-gutter); }
