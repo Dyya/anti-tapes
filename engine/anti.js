@@ -1,5 +1,5 @@
 /*
-  Anti v0.9.6 - a themeable interaction sound engine.
+  Anti v0.9.7 - a themeable interaction sound engine.
   Synthesis only, no assets. One theme object retunes the whole grammar.
   Grammar: grab / tick / undo / commit / reject / release, drones (continuous change),
   notifications (success / info / warning / error).
@@ -29,10 +29,10 @@
   v0.7 adds the signature tier: the brand moment, a roughly two-second motif
   generated deterministically from the theme and its signature.seed. The one
   deliberate exception to "never the same waveform": a sonic logo is fixed.
-  v0.7.1 makes two engine promises true. The signature is now genuinely
-  bit-deterministic: its material layer (contact detune, crinkle, noise burst)
-  drew from Math.random and now draws from a seeded stream, so a rendered logo
-  is byte-identical every time. And the loudness ceiling is real: theme JSON is
+  v0.7.1 seeds the signature's material layer (contact detune, crinkle, noise
+  burst), which previously drew from Math.random. The motif and generated
+  buffers repeat exactly; browser audio rendering can still vary slightly.
+  And the loudness ceiling is real: theme JSON is
   sanitized on ingest (master gain and the graph-facing numbers clamped, NaN
   rejected) and a hard-clip stage closes the bus, so nothing leaves it above
   0 dBFS. deepMerge also drops __proto__/constructor/prototype so an untrusted
@@ -87,6 +87,12 @@
   theme played through the old brightness and the old level until the next
   edit, and an audition disagreed with a pack rendered from the same theme.
   The bus now follows the theme whenever there is a bus.
+  v0.9.7 makes the listener switch mute scheduled voices as well as new
+  events, normalizes malformed theme sections, and keeps render failures
+  inside the promise contract, including context construction and setup.
+  A drone released during its onset now cancels that ramp before decaying,
+  and a held voice released before any audio has rendered is held where its
+  onset stands, not at the unity a fresh gain node reports.
 */
 // One file, three ways in. As a <script> tag it hangs the API on window.Anti,
 // which is how every surface in this repo loads it, from file://, with no
@@ -104,7 +110,7 @@
 /* @anti:body */
   'use strict';
 
-  var VERSION = '0.9.6';
+  var VERSION = '0.9.7';
   var VOICE_CAP = 16;
   var MIN_GAIN = 0.0001;
 
@@ -206,7 +212,7 @@
 
   var theme = deepMerge({}, DEFAULT_THEME);
   var actx = null;
-  var rng = Math.random; // material randomness draws from here; the signature swaps in a seeded generator so a logo renders bit-identically, everything else keeps live variety
+  var rng = Math.random; // the signature swaps in a seeded generator for fixed material choices; other events keep live variety
   var bus = null; // { master, filter, comp, limiter, userGain, clip }
   var clickBuf = null; // shared noise burst for material contact transients
   var noiseBuf = null; // shared looped noise bed for the 'noise' timbre
@@ -280,6 +286,14 @@
   function safeWave(v, dflt) { return Object.prototype.hasOwnProperty.call(WAVES, v) ? v : dflt; }
   function ownKey(obj, k) { return typeof k === 'string' && Object.prototype.hasOwnProperty.call(obj, k); }
   function sanitizeTheme() {
+    // JSON can replace an entire section with a primitive or an array.
+    // Normalize the containers before assigning their fields, otherwise a
+    // rejected import can leave the live theme half-written and unplayable.
+    ['gain', 'timbre', 'envelope', 'key', 'material', 'etiquette', 'signature', 'events'].forEach(function (name) {
+      var v = theme[name];
+      if (!v || typeof v !== 'object' || Array.isArray(v)) theme[name] = {};
+    });
+    if (typeof theme.name !== 'string') theme.name = DEFAULT_THEME.name;
     var g = theme.gain || (theme.gain = {});
     g.master = safeNum(g.master, 0.9, 0, 2);
     g.voice = safeNum(g.voice, 0.1, 0, 0.4);
@@ -473,7 +487,7 @@
     limiter.attack.value = 0.003;
     limiter.release.value = 0.1;
     var userGain = ctx.createGain();
-    userGain.gain.value = live === false ? 1 : userVol;
+    userGain.gain.value = live === false ? 1 : (enabled ? userVol : 0);
     var clip = makeClip(ctx);
     master.connect(filter);
     filter.connect(comp);
@@ -493,8 +507,7 @@
   }
 
   // One second of white noise, looped by every noise voice. Drawn from rng so
-  // the signature can rebuild it from its seeded stream (a rendered logo on a
-  // noise theme stays bit-identical).
+  // the signature can rebuild the same buffer from its seeded stream.
   function makeNoiseBuf(ctx) {
     var len = Math.floor(ctx.sampleRate * 1.0);
     var buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -787,11 +800,12 @@
       g.gain.setValueAtTime(MIN_GAIN, t);
       var base = clamp(vGain(0.7) * ctx.gain, MIN_GAIN * 2, 0.2);
       // Onset stiffness follows firmness: crisp mechanisms speak sooner.
-      g.gain.exponentialRampToValueAtTime(droneLevel(base, intensity), t + droneOnset());
+      var peak = droneLevel(base, intensity), ramp = droneOnset();
+      g.gain.exponentialRampToValueAtTime(peak, t + ramp);
       g.connect(bus.master);
       trackNode(s.node, g);
       s.node.start(t);
-      drones[id] = { osc: s.node, freq: s.freq, gain: g, base: base, noise: s.noise };
+      drones[id] = { osc: s.node, freq: s.freq, gain: g, base: base, noise: s.noise, t0: t, ramp: ramp, peak: peak };
     },
     move: function (id, value, intensity) {
       var d = drones[id];
@@ -805,11 +819,10 @@
       var d = drones[id];
       if (!d) return;
       delete drones[id];
-      if (!running()) { try { d.osc.stop(); } catch (e) {} return; }
-      var t = actx.currentTime;
       var rel = Math.max(theme.envelope.release, 0.1);
-      d.gain.gain.setTargetAtTime(MIN_GAIN, t, rel / 4);
-      d.osc.stop(t + rel + 0.3);
+      // A short gesture can end before the onset ramp. Leaving that future
+      // ramp scheduled makes the released drone swell to full level again.
+      releaseHeld(d, rel);
     }
   };
 
@@ -847,18 +860,32 @@
     var s = makeSource(wave, g, freq);
     s.freq.setValueAtTime(freq, t);
     g.gain.setValueAtTime(MIN_GAIN, t);
-    g.gain.exponentialRampToValueAtTime(Math.max(peak, MIN_GAIN * 2), t + ramp);
+    peak = Math.max(peak, MIN_GAIN * 2);
+    g.gain.exponentialRampToValueAtTime(peak, t + ramp);
     g.connect(bus.master);
     trackNode(s.node, g);
     s.node.start(t);
-    return { osc: s.node, freq: s.freq, gain: g };
+    return { osc: s.node, freq: s.freq, gain: g, t0: t, ramp: ramp, peak: peak };
+  }
+  // Where a held voice stands at the moment it is released. The node is
+  // asked, but its answer is only as fresh as the last rendered quantum, and
+  // a new GainNode reads 1 until one has run: released in the task that
+  // started it, or while the context is still arming (the first tap on iOS,
+  // where the clock has not moved), the voice would be held at unity, some
+  // 20 dB over its own peak. During the onset the level is known without
+  // asking, so the answer is the lower of the two.
+  function heldLevel(v, t) {
+    var seen = v.gain.gain.value;
+    var dt = t - v.t0;
+    if (dt < v.ramp) seen = Math.min(seen, MIN_GAIN * Math.pow(v.peak / MIN_GAIN, Math.max(0, dt) / v.ramp));
+    return Math.max(seen, MIN_GAIN);
   }
   function releaseHeld(v, rel) {
     if (!v) return;
     if (!running()) { try { v.osc.stop(); } catch (e) {} return; }
     var t = actx.currentTime;
     v.gain.gain.cancelScheduledValues(t);
-    v.gain.gain.setValueAtTime(Math.max(v.gain.gain.value, MIN_GAIN), t);
+    v.gain.gain.setValueAtTime(heldLevel(v, t), t);
     v.gain.gain.setTargetAtTime(MIN_GAIN, t, Math.max(rel, 0.05) / 4);
     v.osc.stop(t + rel + 0.3);
   }
@@ -1070,14 +1097,14 @@
     // A logo is fixed. For the length of the signature, the material layer's
     // randomness (the contact detune, the crinkle scatter, the noise burst)
     // draws from its own seeded stream and the click buffer is rebuilt from it,
-    // so the same theme renders bit-identically every time. The melody was
+    // so the same theme generates the same material every time. The melody was
     // already deterministic (its own mulberry above); only the material was
     // leaking Math.random. Both are restored in finally, so live interaction
     // keeps its variety.
     var prevRng = rng, prevClick = clickBuf, prevNoise = noiseBuf;
     rng = mulberry((h ^ Math.imul(seed + 2, 2246822519)) >>> 0);
     clickBuf = makeClickBuf(actx);
-    noiseBuf = makeNoiseBuf(actx); // a noise-timbre logo must render bit-identically too
+    noiseBuf = makeNoiseBuf(actx); // the noise-timbre logo repeats its source buffer too
     // The logo gets a fuller stage than an interaction event; the limiter still rules.
     VOICE_CAP += 10;
     try {
@@ -1144,17 +1171,19 @@
     if (!OAC) return Promise.reject(new Error('OfflineAudioContext unavailable'));
     var sr = opts.sampleRate || 48000;
     var dur = clamp(opts.duration || 2.5, 0.5, 10);
-    var octx = new OAC(1, Math.ceil(sr * dur), sr);
     var prevActx = actx, prevBus = bus, prevClick = clickBuf, prevNoise = noiseBuf, prevVc = vc;
-    actx = octx;
-    bus = makeBus(octx, false);
-    clickBuf = makeClickBuf(octx);
-    noiseBuf = makeNoiseBuf(octx);
-    vc = { n: 0 };
-    offline = true;
-    evCtx = ctxFor(name);
+    var octx;
     try {
+      octx = new OAC(1, Math.ceil(sr * dur), sr);
+      actx = octx;
+      bus = makeBus(octx, false);
+      clickBuf = makeClickBuf(octx);
+      noiseBuf = makeNoiseBuf(octx);
+      vc = { n: 0 };
+      offline = true;
+      evCtx = ctxFor(name);
       fn(typeof opts.value === 'number' ? opts.value : undefined);
+      return octx.startRendering();
     } catch (e) {
       // A scheduling failure keeps the promise contract: callers wrote
       // render().catch() and must not need a synchronous try as well.
@@ -1168,7 +1197,6 @@
       noiseBuf = prevNoise;
       vc = prevVc;
     }
-    return octx.startRendering();
   }
 
   // Declarative binding: data-anti (click), data-anti-hover, data-anti-down, data-anti-up.
@@ -1207,6 +1235,10 @@
     on = !!on;
     if (!on && enabled) silence(); // release held voices gracefully before going silent
     enabled = on;
+    // New-event gating alone leaves a scheduled signature or a long material
+    // tail sounding after the listener switches off. Mute the live bus too;
+    // offline exports keep their own full-volume bus.
+    if (bus && actx && !offline) bus.userGain.gain.setTargetAtTime(enabled ? userVol : 0, actx.currentTime, 0.01);
     try { window.localStorage.setItem('anti.enabled', enabled ? 'true' : 'false'); } catch (e) {}
     return enabled;
   }
@@ -1217,7 +1249,7 @@
     if (typeof v !== 'number' || !isFinite(v)) return userVol;
     userVol = clamp(v, 0, 1);
     try { window.localStorage.setItem('anti.volume', String(userVol)); } catch (e) {}
-    if (bus && actx && !offline) bus.userGain.gain.setTargetAtTime(userVol, actx.currentTime, 0.03);
+    if (bus && actx && !offline) bus.userGain.gain.setTargetAtTime(enabled ? userVol : 0, actx.currentTime, 0.03);
     return userVol;
   }
 

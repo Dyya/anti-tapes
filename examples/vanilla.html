@@ -145,7 +145,8 @@ const end = () =&gt; {
   Anti.drone.stop('level')            <span class="cmt">// the release</span>
 }
 window.addEventListener('pointerup', end)
-window.addEventListener('pointercancel', end)</pre>
+window.addEventListener('pointercancel', end)
+window.addEventListener('blur', end)</pre>
     </div>
   </section>
 
@@ -270,6 +271,7 @@ toast(tier, message)</pre>
   };
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', endDrag);
 
   // 04. The progress run.
   const upstate = el('upstate'), cancel = el('cancel');

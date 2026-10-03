@@ -1,6 +1,6 @@
 {
   "name": "anti-tapes",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Interaction sound as a system, not a pile of clicks. A tiny, dependency-free Web Audio engine that renders a fixed event grammar from one theme object. Synthesis only, no assets.",
   "keywords": [
     "sound",
