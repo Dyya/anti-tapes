@@ -107,7 +107,11 @@ body {
 
 button, input, select { font: inherit; color: inherit; }
 a { color: inherit; }
-:focus-visible { outline: 1px solid var(--at-accent); outline-offset: 2px; }
+/* Focus is the hover state: a fill, never a stroke around the control. What
+   you press inverts, a switch fills, a link inverts like a word-button, and a
+   field you type in is marked by its caret. */
+:focus-visible { outline: none; }
+a:focus-visible { background: var(--at-ink); color: var(--at-paper); opacity: 1; }
 
 /* The page frame. One gutter, every edge, which is the one distance the whole
    brand keeps. Examples are pages and not apps, so they scroll. The frame is
@@ -171,12 +175,12 @@ a { color: inherit; }
   transition: background var(--at-t2) var(--at-settle), color var(--at-t2) var(--at-settle),
               border-color var(--at-t2) var(--at-settle), transform var(--at-t1) var(--at-settle);
 }
-.at-btn:hover { background: var(--at-ink); color: var(--at-paper); border-color: var(--at-ink); }
+.at-btn:hover, .at-btn:focus-visible { background: var(--at-ink); color: var(--at-paper); border-color: var(--at-ink); }
 .at-btn:active { transform: translateY(1px); }
 .at-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
 .at-btn--primary { background: var(--at-ink); color: var(--at-paper); border-color: var(--at-ink); padding: 0 var(--at-s4); }
-.at-btn--primary:hover { background: var(--at-accent); color: var(--at-on-accent); border-color: var(--at-accent); }
+.at-btn--primary:hover, .at-btn--primary:focus-visible { background: var(--at-accent); color: var(--at-on-accent); border-color: var(--at-accent); }
 
 /* The bracketed variant: a key that says it is a key. */
 .at-btn--tag { overflow: hidden; }
@@ -195,10 +199,12 @@ a { color: inherit; }
   cursor: pointer;
   transition: background var(--at-t2) var(--at-settle), color var(--at-t2) var(--at-settle);
 }
-.at-iconbtn:hover { background: var(--at-ink); color: var(--at-paper); }
+.at-iconbtn:hover, .at-iconbtn:focus-visible { background: var(--at-ink); color: var(--at-paper); }
 
 /* The sound key: pressed is a solid block, not a tint. */
 .at-soundbtn[aria-pressed='true'] { background: var(--at-ink); color: var(--at-paper); border-color: transparent; }
+/* Pressed is already the ink block, so its focus is the other fill. */
+.at-soundbtn:focus-visible { background: var(--at-accent); color: var(--at-on-accent); border-color: transparent; }
 
 /* The brand's switch is a slash in a box, not a lever: one diagonal that
    rotates 90 degrees through the settle, backslash to slash. The geometry is
@@ -236,7 +242,8 @@ a { color: inherit; }
 .at-switch[aria-pressed='true'] .at-switch-slash { transform: rotate(-45deg); color: var(--at-paper); }
 .at-switch:active .at-switch-slash { transform: rotate(45deg) scaleX(0.86); }
 .at-switch[aria-pressed='true']:active .at-switch-slash { transform: rotate(-45deg) scaleX(0.86); }
-.at-switch:focus-visible { outline: none; border-color: var(--at-accent); }
+.at-switch:focus-visible { outline: none; background: var(--at-accent); border-color: transparent; }
+.at-switch:focus-visible .at-switch-slash { color: var(--at-on-accent); }
 @media (prefers-reduced-motion: reduce) { .at-switch-slash { transition: none; } }
 
 /* ---------- form controls ---------- */
@@ -257,7 +264,8 @@ a { color: inherit; }
   min-width: 0;
   transition: border-color var(--at-t2) var(--at-settle);
 }
-.at-input:focus, .at-select:focus { outline: none; border-color: var(--at-accent); }
+.at-input:focus, .at-select:focus { outline: none; }
+.at-select:focus-visible { color: var(--at-accent-ink); }
 .at-input::placeholder { color: var(--at-ink-3); }
 
 /* A labelled row. minmax(0, 1fr) and not a bare 1fr: a bare one cannot shrink
@@ -272,6 +280,7 @@ a { color: inherit; }
    promise: without the script the native input stays usable. */
 .at-fader { display: grid; gap: var(--at-s2); width: 100%; max-width: 320px; }
 .at-fader input[type='range'] { width: 100%; accent-color: var(--at-accent); }
+.at-fader input[type='range']:focus-visible { accent-color: var(--at-ink); }
 
 /* ---------- containers ---------- */
 
