@@ -1,7 +1,7 @@
 {
   "name": "anti-tapes",
   "version": "0.9.7",
-  "description": "Interaction sound as a system, not a pile of clicks. A tiny, dependency-free Web Audio engine that renders a fixed event grammar from one theme object. Synthesis only, no assets.",
+  "description": "Design custom interaction sounds for apps and websites. Synthesized live from a single theme, with no samples or dependencies.",
   "keywords": [
     "sound",
     "audio",
