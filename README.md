@@ -4,7 +4,7 @@ Custom interaction sound design for digital interfaces.
 
 Anti Tapes Studio is a dependency-free Web Audio engine for designing responsive sound for software, web, and mobile interfaces.
 It shapes sound in real time around user interaction and context, turning interface behavior into a coherent sound language controlled by a single theme.
-Every sound is synthesized live. Nothing is fetched or sampled. The same interaction remains recognizable without producing the exact same waveform twice, and a single JSON object can retune the entire sound system.
+Every sound is synthesized live. Nothing is fetched or sampled. The same interaction remains recognizable without producing the same waveform twice, and a single JSON object can retune the entire sound system.
 
 Built from a decade of interaction sound practice at Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)).
 
