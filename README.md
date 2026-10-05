@@ -1,8 +1,8 @@
 # Anti
 
-Interaction sound as a system, not a pile of clicks.
+Interaction sound as a system.
 
-Anti is a tiny, dependency-free Web Audio engine that gives an interface a coherent voice. It renders a fixed event grammar (grab, tick, undo, commit, reject, release, a progress tier for loading, the notifications success / info / warning / error, and a deterministic signature) from one theme object. Every sound is synthesized live: nothing is fetched or sampled. The same meaning always reads the same, the exact waveform never repeats, and one JSON retunes the whole product.
+Anti is a small, dependency-free Web Audio engine that gives an interface a coherent voice. It renders a fixed event grammar (grab, tick, undo, commit, reject, release, a progress tier for loading, the notifications success / info / warning / error, and a deterministic signature) from one theme object. Every sound is synthesized live: nothing is fetched or sampled. The same meaning always reads the same, the exact waveform never repeats, and one JSON retunes the whole product.
 
 Built on a decade of interaction sound practice at Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)).
 
