@@ -1,10 +1,10 @@
-# Anti
+# Anti Studio
 
-Interaction sound as a system.
-
-Anti is a small, dependency-free Web Audio engine that gives an interface a coherent voice. It renders a fixed event grammar (grab, tick, undo, commit, reject, release, a progress tier for loading, the notifications success / info / warning / error, and a deterministic signature) from one theme object. Every sound is synthesized live: nothing is fetched or sampled. The same meaning always reads the same, the exact waveform never repeats, and one JSON retunes the whole product.
-
-Built on a decade of interaction sound practice at Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)).
+Custom interaction sound design for digital interfaces.
+Anti Tapes Studio is a dependency-free Web Audio engine for designing responsive sound for software, web, and mobile interfaces.
+It shapes sound in real time around user interaction and context, turning interface behavior into a coherent sound language controlled by a single theme.
+Every sound is synthesized live. Nothing is fetched or sampled. The same interaction remains recognizable without producing the exact same waveform twice, and a single JSON object can retune the entire sound system.
+Built from a decade of interaction sound practice at Anti Tapes (est. 2016, [anti.fyi](https://anti.fyi)).
 
 ## Install
 
