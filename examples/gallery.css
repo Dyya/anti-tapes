@@ -36,7 +36,9 @@
      cannot reopen silently. */
   --at-ink: #0A0A0A;
   --at-ink-2: rgba(10, 10, 10, 0.66);
-  --at-ink-3: rgba(10, 10, 10, 0.42);
+  --at-ink-3: #6B6A6A;
+  --at-panel-ink-3: #6B6A6A;
+  --at-on-ink-3: #818080;
   --at-hairline: rgba(10, 10, 10, 0.12);
   --at-hairline-2: rgba(10, 10, 10, 0.22);
   /* The accent's two steps, mirroring the design system: --at-accent is the
@@ -81,7 +83,9 @@ body[data-at-theme='night'] {
   --at-panel: #1C1D1E;
   --at-ink: #F0F0F0;
   --at-ink-2: rgba(240, 240, 240, 0.68);
-  --at-ink-3: rgba(240, 240, 240, 0.44);
+  --at-ink-3: #818080;
+  --at-panel-ink-3: #868585;
+  --at-on-ink-3: #6B6A6A;
   --at-hairline: rgba(240, 240, 240, 0.14);
   --at-hairline-2: rgba(240, 240, 240, 0.24);
   --at-accent-ink: #F2454E;
@@ -294,7 +298,7 @@ a:focus-visible { background: var(--at-ink); color: var(--at-paper); opacity: 1;
    not a container fill, which is why this is --at-panel and not --at-surface:
    every control assumes paper behind it, so a surface-painted panel makes its
    own controls vanish. */
-.at-card--panel { background: var(--at-panel); border-color: transparent; }
+.at-card--panel { background: var(--at-panel); border-color: transparent; --at-ink-3: var(--at-panel-ink-3); }
 
 /* The lockup: the mark and the surface's name, standing on the page itself,
    as the studio wears it. The mark is the way home, on every page; the name
@@ -378,8 +382,7 @@ a:focus-visible { background: var(--at-ink); color: var(--at-paper); opacity: 1;
   border-color: transparent;
 }
 .at-toast--error .msg { color: var(--at-paper); }
-.at-toast--error time { color: rgba(255, 255, 255, 0.55); }
-body[data-at-theme='night'] .at-toast--error time { color: rgba(10, 11, 12, 0.55); }
+.at-toast--error time { color: var(--at-on-ink-3); }
 
 .at-dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; }
 .at-dot--ring { background: transparent; box-shadow: inset 0 0 0 1px currentColor; }

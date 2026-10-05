@@ -61,7 +61,6 @@ const SITE = 'https://anti.fyi';
 // where the four that stay are spread evenly across the width.
 const FOOTER = [
   ['GitHub', 'https://github.com/Dyya/anti-tapes', 'wide'],
-  ['Register', '', 'wide'],
   ['Contact', 'mailto:hello@anti.fyi'],
   ['Privacy', SITE + '/privacy'],
   ['Terms', SITE + '/terms'],
